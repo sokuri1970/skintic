@@ -163,8 +163,19 @@
                     <div class="pill-btn" onclick="selectPill('gender', 'Male', this)">Male</div>
                     <div class="pill-btn" onclick="selectPill('gender', 'Neutral', this)">Unspecified</div>
                 </div>
+                <fieldset id="main-concerns" style="border:0; padding:8px 0; margin:0;">
+                    <legend class="option-label">Main skin concerns</legend>
+                    <div style="display:flex;flex-wrap:wrap;gap:8px">
+                        <label><input type="checkbox" value="Dryness"> Dryness</label>
+                        <label><input type="checkbox" value="Oiliness"> Oiliness</label>
+                        <label><input type="checkbox" value="Redness"> Redness</label>
+                        <label><input type="checkbox" value="Pores"> Pores</label>
+                        <label><input type="checkbox" value="Pigmentation"> Pigmentation</label>
+                        <label><input type="checkbox" value="Wrinkles"> Wrinkles</label>
+                    </div>
+                </fieldset>
                 <div class="safety-row">
-                    <span>🛡️ Safe for Pregnancy / Rx Meds (레티놀 제외)</span>
+                    <span>🛡️ Pregnant / Nursing or Taking Acne Medication</span>
                     <input type="checkbox" id="safety-toggle">
                 </div>
             </div>
@@ -202,15 +213,15 @@
 
             <div class="analysis-box">
                 <div class="bar-group">
-                    <div class="bar-label"><span>🔴 Redness / Sensitivity</span><span id="val-red">82%</span></div>
+                    <div class="bar-label"><span>Redness</span><span id="val-red">—</span></div>
                     <div class="bar-bg"><div id="bar-red" class="bar-fill" style="background:#ef4444;"></div></div>
                 </div>
                 <div class="bar-group">
-                    <div class="bar-label"><span>💧 Hydration Deficit</span><span id="val-blue">50%</span></div>
+                    <div class="bar-label"><span>Moisture</span><span id="val-blue">—</span></div>
                     <div class="bar-bg"><div id="bar-blue" class="bar-fill" style="background:#3b82f6;"></div></div>
                 </div>
                 <div class="bar-group">
-                    <div class="bar-label"><span>🕳️ Pore Concern (100 − Pore Score)</span><span id="val-green">40%</span></div>
+                    <div class="bar-label"><span>Visible Pores</span><span id="val-green">—</span></div>
                     <div class="bar-bg"><div id="bar-green" class="bar-fill" style="background:#10b981;"></div></div>
                 </div>
             </div>
@@ -229,9 +240,9 @@
             <div class="product-card">
                 <div class="product-img">🍀</div>
                 <div class="product-info">
-                    <div class="product-step">Hero Ampoule • Calming</div>
+                    <div class="product-step">Hero Product</div>
                     <div class="product-name" id="main-product-name">SKIN1004 센텔라 앰플 (100ml)</div>
-                    <div class="stock-badge">● In Stock (Silicon2 즉시 발송)</div>
+
                 </div>
                 <div class="product-price">$22.00</div>
             </div>
@@ -239,8 +250,8 @@
             <label class="upsell-card">
                 <input type="checkbox" id="upsell-check" onchange="updateTotalPrice()">
                 <div class="upsell-text">
-                    <strong>시너지 루틴 추가: Anua 어성초 77% 토너</strong><br>
-                    함께 사용 시 진정 효과 2배 (+$16.00 / $2 할인)
+                    <strong>Add Anua Heartleaf 77 Soothing Toner</strong><br>
+                    Lightweight hydration • +$16.00
                 </div>
             </label>
 
@@ -550,9 +561,71 @@
         function openQuizModal() { document.getElementById('modal-quiz').style.display = 'flex'; }
         function submitQuiz() { closeModals(); startAnalysisProcess(); }
 
+        const advisorConcerns = {
+            Dryness: 'cream',
+            Oiliness: 'toner',
+            Redness: 'centella',
+            Pores: 'pad',
+            Pigmentation: 'serum',
+            Wrinkles: 'sunscreen'
+        };
+
+        const advisorProducts = {
+            cream: ['Anua 3 Ceramide Panthenol Moisture Barrier Cream', 'moisturizing dry-feeling skin'],
+            toner: ['Anua Heartleaf 77 Soothing Toner', 'lightweight hydration for a routine that feels comfortable on oily skin'],
+            centella: ['SKIN1004 Madagascar Centella Ampoule', 'gentle care for skin that looks red or feels sensitive'],
+            pad: ['Anua Heartleaf 77 Clear Pad', 'gentle exfoliation for the appearance of pores'],
+            serum: ['Beauty of Joseon Glow Deep Serum: Rice + Alpha-Arbutin', 'care for the appearance of uneven skin tone'],
+            sunscreen: ['Beauty of Joseon Relief Sun: Rice + Niacinamide', 'daily sun protection to support your skincare routine']
+        };
+
+        function readAdvisorProfile(quizConcern) {
+            const selected = [...document.querySelectorAll('#main-concerns input:checked')].map(input => input.value);
+            const concerns = quizConcern ? [...new Set([quizConcern, ...selected])] : selected;
+            return { concerns, cautious: document.getElementById('safety-toggle').checked };
+        }
+
+        function buildAdvisor(profile, photo) {
+            const reported = profile.concerns.filter(name => Object.hasOwn(advisorConcerns, name));
+            const signals = [
+                [photo?.skinType === 'Dry' ? 'Dryness' : photo?.skinType === 'Oily' ? 'Oiliness' : null,
+                    photo?.skinType ? 'Skin type: ' + photo.skinType.toLowerCase() : null],
+                [photo?.pores?.detected > 0 ? 'Pores' : null,
+                    photo?.pores ? 'Visible pores in ' + photo.pores.detected + ' of ' + photo.pores.checked + ' areas checked' : null],
+                [photo?.spots === true ? 'Pigmentation' : null,
+                    photo?.spots === true ? 'Visible spots detected' : null],
+                [photo?.fineLines?.detected > 0 ? 'Wrinkles' : null,
+                    photo?.fineLines?.detected > 0 ? 'Visible lines detected' : null]
+            ];
+            const detected = signals.map(([concern]) => concern).filter(Boolean);
+            const agreed = reported.filter(name => detected.includes(name));
+            const focus = agreed[0] || reported[0] || detected[0];
+            const copy = [];
+            if (reported.length) copy.push('You selected: ' + reported.join(', ') + '.');
+            if (photo) {
+                const descriptions = signals.map(([, description]) => description).filter(Boolean);
+                if (descriptions.length) copy.push('Photo observations: ' + descriptions.join('; ') + '.');
+                if (agreed.length) copy.push('Your answers and the photo both point to concerns related to ' +
+                    agreed.map(name => name.toLowerCase()).join(', ') + '.');
+                const other = reported.filter(name => !detected.includes(name));
+                if (other.length) copy.push('We also considered your answers about ' +
+                    other.map(name => name.toLowerCase()).join(', ') + '.');
+                copy.push('This scan does not measure moisture or redness.');
+            }
+            let sku = advisorConcerns[focus] || 'cream';
+            if ((profile.cautious || reported.includes('Redness')) && sku === 'pad') sku = 'centella';
+            if (profile.cautious && sku === 'serum') sku = 'sunscreen';
+            const [name, purpose] = advisorProducts[sku];
+            if (focus) copy.push('Your routine prioritizes ' + focus.toLowerCase() + '.');
+            copy.push('Start with ' + name + '. We chose it for ' + purpose + '.');
+            if (focus && sku !== advisorConcerns[focus]) copy.push('We selected a simpler routine based on your sensitivity or safety preferences.');
+            return { sku, name, advice: copy.join(' ') };
+        }
+
         function startAnalysisProcess() {
             aiResultMetrics = { score: null, red: null, blue: null, green: null,
-                primaryConcern: document.getElementById('quiz-concern').value, isRealAi: false };
+                profile: readAdvisorProfile(({ Hydration: 'Dryness' })[document.getElementById('quiz-concern').value] ||
+                    document.getElementById('quiz-concern').value), isRealAi: false };
 
             document.getElementById('modal-loading').style.display = 'flex';
             setTimeout(() => {
@@ -563,6 +636,7 @@
         }
 
         async function runRealAiAnalysis(base64Img) {
+            const profile = readAdvisorProfile();
             const loading = document.getElementById('modal-loading');
             loading.style.display = 'flex';
             const preview = document.getElementById('scan-preview-img');
@@ -574,23 +648,13 @@
                     body: JSON.stringify({ imageBase64: base64Img })
                 });
                 const json = await res.json().catch(() => ({}));
-                const m = json.metrics;
-                const valid = value => typeof value === 'number' && value >= 0 && value <= 100;
-                if (!res.ok || ![m?.redness, m?.moisture, m?.pores].every(valid)) {
+                const photo = json.observations;
+                if (!res.ok || !photo || typeof photo !== 'object' || !Object.values(photo).some(value => value != null)) {
                     const message = json.error ?? json.error_msg;
                     throw new Error(typeof message === 'string' ? message :
                         'The analysis API returned an unexpected response (HTTP ' + res.status + ').');
                 }
-
-                const red = Math.round(m.redness);
-                const blue = Math.round(100 - m.moisture);
-                const green = Math.round(100 - m.pores);
-                aiResultMetrics = {
-                    score: valid(m.overall) ? Math.round(m.overall) : null,
-                    red, blue, green,
-                    primaryConcern: red >= blue && red >= green ? 'Redness' : blue >= green ? 'Hydration' : 'Pores',
-                    isRealAi: true
-                };
+                aiResultMetrics = { score: null, profile, photo, isRealAi: true };
 
                 if (userEmail) renderReport();
                 else document.getElementById('modal-email').style.display = 'flex';
@@ -646,29 +710,25 @@
 
             const scoreBadge = document.querySelector('.score-badge');
             if (scoreBadge) {
+                scoreBadge.hidden = !Number.isFinite(aiResultMetrics.score);
                 scoreBadge.innerHTML = `${aiResultMetrics.score ?? '—'}<span class="score-sub">Skin Score</span>`;
             }
-            if (document.getElementById('val-red')) document.getElementById('val-red').innerText = aiResultMetrics.red == null ? '—' : `${aiResultMetrics.red}%`;
-            if (document.getElementById('val-blue')) document.getElementById('val-blue').innerText = aiResultMetrics.blue == null ? '—' : `${aiResultMetrics.blue}%`;
-            if (document.getElementById('val-green')) document.getElementById('val-green').innerText = aiResultMetrics.green == null ? '—' : `${aiResultMetrics.green}%`;
+            if (document.getElementById('val-red')) document.getElementById('val-red').innerText = 'Not measured';
+            if (document.getElementById('val-blue')) document.getElementById('val-blue').innerText = 'Not measured';
+            if (document.getElementById('val-green')) document.getElementById('val-green').innerText = aiResultMetrics.photo?.pores
+                ? aiResultMetrics.photo.pores.detected + ' of ' + aiResultMetrics.photo.pores.checked + ' areas'
+                : 'Not measured';
 
-            let prodName = "SKIN1004 Madagascar Centella Ampoule (100ml)";
-            let advice = `"Measured redness intensity (${aiResultMetrics.red}%). Pure Centella Asiatica extract is recommended to calm inflammation and strengthen your skin barrier."`;
-
-            if (aiResultMetrics.primaryConcern === 'Hydration') {
-                prodName = "Beauty of Joseon Relief Sun & Hyaluronic Serum";
-                advice = `"Estimated moisture deficit from the photo (${aiResultMetrics.blue}%). Deep hydration with zero white cast is recommended for a balanced, healthy glow."`;
-            } else if (aiResultMetrics.primaryConcern === 'Pores') {
-                prodName = "Anua Heartleaf 77% Soothing & Pore Control Toner";
-                advice = `"Pore concern score (${aiResultMetrics.green}%). Gentle Heartleaf extract is recommended to balance sebum without stripping moisture."`;
-            }
-
-            if (!aiResultMetrics.isRealAi) {
-                advice = "This routine is based on the concern selected in your questionnaire.";
-            }
+            const { sku, name: prodName, advice } = buildAdvisor(
+                aiResultMetrics.profile || readAdvisorProfile(), aiResultMetrics.photo);
+            const upsell = document.getElementById('upsell-check');
+            upsell.checked = false;
+            upsell.closest('label').hidden = sku === 'toner';
+            upsell.closest('label').style.display = sku === 'toner' ? 'none' : '';
+            updateTotalPrice();
 
             const aiStatusTag = aiResultMetrics.isRealAi
-                ? `<div style="font-size:11px; color:#059669; font-weight:700; margin-bottom:6px;">⚡ Live AILabTools Engine Connected</div>`
+                ? `<div style="font-size:11px; color:#059669; font-weight:700; margin-bottom:6px;">⚡ AILabTools Basic Photo Analysis</div>`
                 : `<div style="font-size:11px; color:#dc2626; font-weight:700; margin-bottom:6px;">Questionnaire-based routine</div>`;
 
             const adviceEl = document.getElementById('ai-advice-text') || document.querySelector('.ai-advice');
@@ -745,7 +805,8 @@
         function goToCheckout() {
             if (userEmail) document.getElementById('ship-email').value = userEmail;
             const isUpsell = document.getElementById('upsell-check').checked;
-            document.getElementById('summary-item-name').innerText = isUpsell ? "SKIN1004 Ampoule + Anua Toner Set" : document.getElementById('main-product-name').innerText;
+            document.getElementById('summary-item-name').innerText = document.getElementById('main-product-name').innerText +
+                (isUpsell ? ' + ' + advisorProducts.toner[0] : '');
             document.getElementById('summary-item-price').innerText = `$${totalPrice.toFixed(2)}`;
             document.getElementById('summary-total-price').innerText = `$${totalPrice.toFixed(2)}`;
            
