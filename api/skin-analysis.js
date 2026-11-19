@@ -1,7 +1,7 @@
 const { randomBytes } = require("node:crypto");
 
 // Vercel Production uses AILABTOOLS_API_KEY; AILAB_API_KEY is a legacy alias.
-const AILAB_URL = "https://www.ailabapi.com/api/portrait/analysis/skin-analysis-pro";
+const AILAB_URL = "https://www.ailabapi.com/api/portrait/analysis/skin-analysis";
 const MAX_IMAGE_BYTES = 2_000_000;
 
 function upstreamError(status, payload) {
@@ -11,7 +11,7 @@ function upstreamError(status, payload) {
   const effective = status >= 400 ? status : providerStatus;
 
   if ([401, 402, 403, 429].includes(effective) && code !== "ERROR_ILLEGAL_FILE") {
-    return [502, "AILabTools rejected the request. Check the API key, Skin Analyze Pro access, and account quota." + suffix];
+    return [502, "AILabTools rejected the request. Check the API key, Skin Analyze Basic access, and account quota." + suffix];
   }
   if (effective === 413) return [413, "Please choose a photo under 2 MB." + suffix];
   if (effective === 415 || effective === 422 || code === "ERROR_FACE_NOT_FOUND" || code === "ERROR_ILLEGAL_FILE") {
@@ -52,7 +52,6 @@ module.exports = async function handler(req, res) {
 
   const boundary = "skintic-" + randomBytes(18).toString("hex");
   const multipart = Buffer.concat([
-    Buffer.from("--" + boundary + '\r\nContent-Disposition: form-data; name="return_maps"\r\n\r\nred_area\r\n'),
     Buffer.from("--" + boundary + '\r\nContent-Disposition: form-data; name="image"; filename="skin.jpg"\r\nContent-Type: image/jpeg\r\n\r\n'),
     bytes,
     Buffer.from("\r\n--" + boundary + "--\r\n")
@@ -75,18 +74,21 @@ module.exports = async function handler(req, res) {
       return fail(...upstreamError(upstream.status, payload));
     }
     const result = payload?.result ?? payload?.data?.result;
-    const scores = result?.score_info;
-    const bounded = value => typeof value === "number" && value >= 0 && value <= 100 ? value : null;
-    const metrics = {
-      redness: bounded(result?.sensitivity?.sensitivity_intensity),
-      moisture: bounded(scores?.water_score),
-      pores: bounded(scores?.pores_score),
-      overall: bounded(scores?.total_score)
+    const flag = field => field?.value === 1 ? true : field?.value === 0 ? false : null;
+    const count = fields => {
+      const values = fields.map(name => flag(result?.[name])).filter(value => value !== null);
+      return values.length ? { detected: values.filter(Boolean).length, checked: values.length } : null;
     };
-    if (metrics.redness === null || metrics.moisture === null || metrics.pores === null) {
-      return fail(502, "AILabTools Pro did not return redness, moisture, and pore measurements. Check that the account has Skin Analyze Pro access and try a clearer photo.");
+    const observations = {
+      skinType: ['Oily', 'Dry', 'Normal', 'Combination'][result?.skin_type?.skin_type] ?? null,
+      pores: count(['pores_forehead', 'pores_left_cheek', 'pores_right_cheek', 'pores_jaw']),
+      fineLines: count(['forehead_wrinkle', 'crows_feet', 'eye_finelines', 'glabella_wrinkle', 'nasolabial_fold']),
+      spots: flag(result?.skin_spot)
+    };
+    if (Object.values(observations).every(value => value === null)) {
+      return fail(502, "AILabTools Basic did not return usable observations. Try a clearer photo.");
     }
-    return res.status(200).json({ metrics });
+    return res.status(200).json({ observations });
   } catch (error) {
     if (error.name === "TimeoutError" || error.name === "AbortError") {
       return fail(504, "AILabTools timed out. Please try again.");
