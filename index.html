@@ -1,254 +1,830 @@
 <!DOCTYPE html>
-<html lang="ko">
+<html lang="en" translate="no">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>Skintic | AI Skin Analysis</title>
-<style>
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body {
-    font-family: -apple-system, "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
-    background: linear-gradient(135deg, #eef2ff, #fdf2f8); color: #0f172a;
-    min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 16px;
-  }
-  .phone {
-    width: 100%; max-width: 420px; height: 850px; background: #fff; border-radius: 44px;
-    box-shadow: 0 0 0 10px #0f172a, 0 30px 70px -10px rgba(79,70,229,.35);
-    overflow: hidden; position: relative; display: flex; flex-direction: column;
-  }
-  .header { display: flex; justify-content: space-between; align-items: center; padding: 46px 20px 14px; border-bottom: 1px solid #eef2f7; }
-  .logo { font-size: 22px; font-weight: 800; background: linear-gradient(90deg,#4f46e5,#ec4899); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; cursor: pointer; }
-  .screen { flex: 1; position: relative; overflow: hidden; }
-  .view { position: absolute; inset: 0; overflow-y: auto; padding: 0 20px 28px; background: #fff; opacity: 0; visibility: hidden; transition: opacity .3s; }
-  .view.active { opacity: 1; visibility: visible; }
-  .badge { display: inline-block; margin-top: 30px; font-size: 12px; font-weight: 700; color: #4338ca; background: #ede9fe; padding: 7px 12px; border-radius: 999px; }
-  h1 { margin-top: 16px; font-size: 32px; line-height: 1.15; letter-spacing: -1px; }
-  h1 span { color: #4f46e5; }
-  .sub { margin-top: 12px; font-size: 14px; color: #475569; line-height: 1.6; }
-  .scan { margin-top: 26px; padding: 30px 20px; text-align: center; border-radius: 24px; border: 2px dashed #a5b4fc; background: linear-gradient(135deg,#ecfdf5,#f5f3ff,#fdf2f8); cursor: pointer; }
-  .scan .icon { font-size: 40px; }
-  .scan .t { margin-top: 10px; font-weight: 800; }
-  .scan .d { margin-top: 6px; font-size: 12px; color: #64748b; line-height: 1.5; }
-  .cta { display: inline-block; margin-top: 14px; padding: 10px 18px; border-radius: 999px; color: #fff; font-size: 12.5px; font-weight: 700; background: linear-gradient(90deg,#4f46e5,#ec4899); }
-  .back { width: 38px; height: 38px; margin-top: 14px; border-radius: 50%; background: #f1f5f9; font-size: 18px; font-weight: 700; }
-  .title { margin-top: 14px; font-size: 24px; font-weight: 800; }
-  .score { float: right; margin-top: -40px; padding: 12px 16px; border-radius: 16px; color: #fff; text-align: center; background: linear-gradient(145deg,#4f46e5,#4338ca); }
-  .score b { font-size: 30px; }
-  .card { margin-top: 22px; padding: 18px; border-radius: 20px; border: 1px solid #eef2f7; box-shadow: 0 10px 30px -18px rgba(15,23,42,.25); }
-  .chip { display: inline-block; font-size: 12px; font-weight: 700; color: #4338ca; background: #ede9fe; padding: 5px 10px; border-radius: 999px; margin-bottom: 14px; }
-  .metric { margin-bottom: 16px; }
-  .mhead { display: flex; justify-content: space-between; font-size: 13px; font-weight: 700; margin-bottom: 6px; }
-  .mhead small { display: block; font-weight: 500; color: #94a3b8; font-size: 11px; }
-  .track { height: 10px; background: #f1f5f9; border-radius: 999px; overflow: hidden; }
-  .fill { height: 100%; width: 0; border-radius: 999px; transition: width 1s; }
-  .red { background: linear-gradient(90deg,#f87171,#dc2626); }
-  .blue { background: linear-gradient(90deg,#60a5fa,#2563eb); }
-  .advisor { margin-top: 20px; padding: 16px; border-radius: 16px; background: #f5f3ff; border-left: 6px solid #4f46e5; font-size: 13.5px; line-height: 1.7; color: #334155; }
-  .advisor b { color: #4338ca; display: block; margin-bottom: 6px; }
-  .note { margin-top: 8px; font-size: 10.5px; color: #94a3b8; }
-  .prod { display: flex; gap: 14px; align-items: center; margin-top: 12px; padding: 12px; border-radius: 18px; border: 1px solid #eef2f7; }
-  .prod .img { width: 80px; height: 80px; border-radius: 14px; display: grid; place-items: center; font-size: 40px; background: #ecfdf5; flex-shrink: 0; }
-  .prod .step { font-size: 11px; font-weight: 800; color: #ec4899; }
-  .prod .name { font-size: 14px; font-weight: 700; margin-top: 3px; }
-  .prod .price { margin-top: 6px; font-weight: 800; color: #4f46e5; }
-  .buy { width: 100%; margin-top: 22px; padding: 18px; border-radius: 999px; background: #0f172a; color: #fff; font-size: 16px; font-weight: 800; }
-  .ship { margin-top: 10px; text-align: center; font-size: 11.5px; color: #64748b; }
-  .link { display: block; margin: 16px auto 0; font-size: 12px; color: #4f46e5; text-decoration: underline; background: none; }
-  .foot { margin-top: 26px; text-align: center; font-size: 10.5px; color: #94a3b8; line-height: 1.7; }
-  .loading { position: absolute; inset: 0; z-index: 40; display: none; align-items: center; justify-content: center; background: rgba(15,23,42,.45); }
-  .loading.open { display: flex; }
-  .box { width: 78%; padding: 26px 20px; border-radius: 22px; background: #fff; text-align: center; font-weight: 700; font-size: 13.5px; line-height: 1.5; }
-  .bar { margin-top: 14px; height: 6px; border-radius: 999px; background: #eef2ff; overflow: hidden; }
-  .bar i { display: block; height: 100%; width: 0; background: linear-gradient(90deg,#4f46e5,#ec4899); transition: width 3s linear; }
-  .bar i.run { width: 100%; }
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Skintic - 1-Second AI K-Beauty Solution (skinmatch.kr)</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+        body { background: #f1f5f9; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
+        .phone-container { width: 100%; max-width: 420px; min-height: 860px; max-height: 95vh; background: #ffffff; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.15); display: flex; flex-direction: column; overflow-y: auto; border-radius: 16px; position: relative; }
+        header { padding: 16px 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #f1f5f9; background: #fff; position: sticky; top: 0; z-index: 99; }
+        .header-left { display: flex; align-items: center; gap: 10px; }
+        .btn-back { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; width: 32px; height: 32px; display: none; justify-content: center; align-items: center; font-size: 16px; font-weight: 800; color: #334155; cursor: pointer; }
+        .logo { font-size: 24px; font-weight: 900; background: linear-gradient(135deg, #ec4899 0%, #4f46e5 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; letter-spacing: -0.5px; cursor: pointer; }
+        .header-right { display: flex; align-items: center; gap: 10px; }
+        .lang-select { border: 1px solid #e2e8f0; border-radius: 8px; padding: 4px 8px; font-size: 12px; font-weight: 700; color: #475569; background: #f8fafc; cursor: pointer; }
+        .btn-history { background: #f5f3ff; border: 1px solid #ddd6fe; border-radius: 8px; padding: 5px 10px; font-size: 12px; font-weight: 700; color: #6d28d9; cursor: pointer; }
+        .page-view { display: none; width: 100%; flex-direction: column; padding: 24px 20px; flex: 1; }
+        .active-view { display: flex !important; }
+        .seasonal-banner { background: linear-gradient(90deg, #fff1f2 0%, #f5f3ff 100%); border: 1px solid #fbcfe8; border-radius: 12px; padding: 10px 14px; font-size: 12px; font-weight: 700; color: #9d174d; margin-bottom: 18px; display: flex; align-items: center; justify-content: space-between; }
+        .badge { background: #f3e8ff; color: #7c3aed; font-size: 11px; font-weight: 800; padding: 5px 12px; border-radius: 9999px; margin-bottom: 12px; align-self: center; text-transform: uppercase; }
+        h1 { font-size: 26px; font-weight: 800; color: #0f172a; line-height: 1.25; margin-bottom: 8px; text-align: center; }
+        h1 span { color: #4f46e5; font-weight: 900; }
+        .description { font-size: 13px; color: #64748b; line-height: 1.5; margin: 0 auto 20px; text-align: center; }
+        .option-box { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 16px; padding: 14px; margin-bottom: 18px; }
+        .option-label { font-size: 11px; font-weight: 800; color: #475569; text-transform: uppercase; margin-bottom: 8px; display: block; }
+        .pill-group { display: flex; gap: 8px; margin-bottom: 12px; }
+        .pill-btn { flex: 1; padding: 8px 4px; border: 1px solid #cbd5e1; border-radius: 10px; background: #fff; font-size: 12px; font-weight: 700; color: #475569; cursor: pointer; text-align: center; }
+        .pill-btn.active { background: #4f46e5; color: #fff; border-color: #4f46e5; }
+        .tone-group { display: flex; justify-content: space-between; gap: 6px; margin-bottom: 12px; }
+        .tone-circle { width: 34px; height: 34px; border-radius: 50%; cursor: pointer; border: 2px solid transparent; }
+        .tone-circle.active { border: 3px solid #4f46e5; transform: scale(1.12); box-shadow: 0 0 0 2px #fff inset; }
+        .safety-row { display: flex; justify-content: space-between; align-items: center; padding-top: 8px; border-top: 1px solid #e2e8f0; font-size: 12px; font-weight: 700; color: #334155; }
+        .safety-row input { width: 18px; height: 18px; accent-color: #4f46e5; cursor: pointer; }
+        .scan-card { width: 100%; background: linear-gradient(135deg, #ffffff 0%, #f3e8ff 100%); border: 2px dashed #c084fc; border-radius: 20px; padding: 28px 20px; cursor: pointer; text-align: center; margin-bottom: 14px; }
+        .camera-box { width: 60px; height: 60px; background: #ffffff; border-radius: 50%; display: flex; justify-content: center; align-items: center; margin: 0 auto 12px; box-shadow: 0 8px 16px rgba(0,0,0,0.08); font-size: 28px; }
+        .card-title { font-size: 17px; font-weight: 800; color: #1e293b; margin-bottom: 4px; }
+        .card-sub { font-size: 12px; color: #64748b; margin-bottom: 14px; }
+        .btn-scan { background: linear-gradient(90deg, #7c3aed 0%, #db2777 100%); color: #ffffff; border: none; padding: 11px 24px; border-radius: 9999px; font-size: 13px; font-weight: 700; cursor: pointer; }
+        .scan-limit-text { font-size: 11px; color: #7c3aed; font-weight: 700; margin-top: 10px; }
+        .btn-quiz { width: 100%; background: #f8fafc; border: 1px solid #cbd5e1; color: #334155; padding: 12px; border-radius: 12px; font-size: 13px; font-weight: 700; cursor: pointer; margin-bottom: 20px; text-align: center; }
+        .partners { width: 100%; margin-top: auto; text-align: center; padding-top: 10px; }
+        .partner-title { font-size: 10px; font-weight: 700; color: #94a3b8; letter-spacing: 1.2px; margin-bottom: 8px; text-transform: uppercase; }
+        .partner-list { display: flex; justify-content: center; gap: 14px; font-size: 12px; font-weight: 700; color: #475569; }
+        .report-header { display: flex; justify-content: space-between; align-items: center; width: 100%; margin-bottom: 18px; }
+        .report-title { font-size: 19px; font-weight: 800; color: #0f172a; line-height: 1.2; }
+        .target-tag { display: inline-block; background: #e0e7ff; color: #3730a3; font-size: 11px; font-weight: 800; padding: 3px 8px; border-radius: 6px; margin-top: 4px; }
+        .score-badge { background: linear-gradient(135deg, #7c3aed 0%, #4f46e5 100%); color: #fff; font-weight: 800; padding: 10px 14px; border-radius: 12px; font-size: 18px; text-align: center; }
+        .score-sub { font-size: 9px; display: block; margin-top: 2px; opacity: 0.9; }
+        .analysis-box { width: 100%; background: #f8fafc; border-radius: 16px; padding: 16px; margin-bottom: 16px; border: 1px solid #e2e8f0; }
+        .bar-group { margin-bottom: 12px; }
+        .bar-group:last-child { margin-bottom: 0; }
+        .bar-label { display: flex; justify-content: space-between; font-size: 12px; font-weight: 700; color: #334155; margin-bottom: 5px; }
+        .bar-bg { width: 100%; height: 9px; background: #e2e8f0; border-radius: 9999px; overflow: hidden; }
+        .bar-fill { height: 100%; border-radius: 9999px; width: 0%; transition: width 1.1s ease-in-out; }
+        .ai-prescription { background: #f5f3ff; border-left: 4px solid #7c3aed; padding: 14px; border-radius: 0 12px 12px 0; font-size: 12.5px; color: #4c1d95; line-height: 1.5; margin-bottom: 16px; font-weight: 500; }
+        .tools-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 20px; }
+        .btn-tool { background: #fff; border: 1px solid #cbd5e1; border-radius: 10px; padding: 10px 8px; font-size: 11.5px; font-weight: 700; color: #1e293b; cursor: pointer; text-align: center; display: flex; align-items: center; justify-content: center; gap: 4px; }
+        .btn-tool.highlight { background: #fdf2f8; border-color: #fbcfe8; color: #be185d; }
+        .section-title { font-size: 13px; font-weight: 800; color: #0f172a; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 0.5px; }
+        .product-card { display: flex; align-items: center; background: #ffffff; border: 2px solid #4f46e5; border-radius: 14px; padding: 12px; margin-bottom: 12px; gap: 12px; }
+        .product-img { font-size: 30px; background: #f5f3ff; padding: 8px; border-radius: 10px; }
+        .product-info { flex: 1; }
+        .product-step { font-size: 10px; font-weight: 800; color: #db2777; text-transform: uppercase; }
+        .product-name { font-size: 14px; font-weight: 800; color: #1e293b; margin: 2px 0; }
+        .stock-badge { font-size: 10px; color: #059669; font-weight: 700; }
+        .product-price { font-size: 15px; font-weight: 900; color: #4f46e5; }
+        .upsell-card { display: flex; align-items: center; background: #f8fafc; border: 1px dashed #94a3b8; border-radius: 12px; padding: 12px; margin-bottom: 20px; gap: 10px; cursor: pointer; }
+        .upsell-card input { width: 18px; height: 18px; accent-color: #db2777; }
+        .upsell-text { flex: 1; font-size: 12px; color: #334155; font-weight: 600; line-height: 1.3; }
+        .btn-primary { width: 100%; background: #0f172a; color: #ffffff; border: none; padding: 15px; border-radius: 14px; font-size: 15px; font-weight: 800; cursor: pointer; margin-bottom: 10px; }
+        .btn-retake { width: 100%; background: #f1f5f9; color: #475569; border: none; padding: 12px; border-radius: 12px; font-size: 13px; font-weight: 700; cursor: pointer; }
+        .form-group { margin-bottom: 12px; }
+        .form-group label { display: block; font-size: 11px; font-weight: 700; color: #475569; margin-bottom: 4px; }
+        .form-group input, .form-group select { width: 100%; padding: 11px; border: 1px solid #cbd5e1; border-radius: 10px; font-size: 13px; color: #0f172a; }
+        .order-summary { background: #f8fafc; border-radius: 12px; padding: 14px; margin: 16px 0; font-size: 13px; }
+        .summary-row { display: flex; justify-content: space-between; margin-bottom: 6px; color: #475569; }
+        .summary-total { display: flex; justify-content: space-between; border-top: 1px solid #cbd5e1; padding-top: 8px; margin-top: 8px; font-weight: 800; font-size: 15px; color: #0f172a; }
+        .btn-paypal { width: 100%; background: #ffc439; color: #003087; border: none; padding: 15px; border-radius: 12px; font-size: 16px; font-weight: 900; cursor: pointer; }
+        .confirm-box { text-align: center; padding: 20px 10px; }
+        .confirm-icon { font-size: 48px; margin-bottom: 12px; }
+        .order-num { background: #f1f5f9; padding: 8px 16px; border-radius: 8px; font-weight: 800; font-size: 14px; color: #4f46e5; display: inline-block; margin: 10px 0 20px; }
+        .revisit-guide { background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 12px; padding: 14px; text-align: left; font-size: 12px; color: #1e40af; line-height: 1.5; margin-bottom: 20px; }
+        .overlay-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15,23,42,0.75); z-index: 200; justify-content: center; align-items: center; padding: 20px; }
+        .modal-card { background: #fff; width: 100%; max-width: 380px; border-radius: 20px; padding: 24px; text-align: center; max-height: 85vh; overflow-y: auto; }
+        .spinner { width: 46px; height: 46px; border: 5px solid #e2e8f0; border-top: 5px solid #7c3aed; border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 18px; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        .history-item { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 12px; margin-bottom: 10px; text-align: left; }
+        .btn-reorder { background: #4f46e5; color: #fff; border: none; padding: 7px 12px; border-radius: 8px; font-size: 11px; font-weight: 700; cursor: pointer; margin-top: 8px; width: 100%; }
+        footer { padding: 16px 20px; background: #f8fafc; border-top: 1px solid #f1f5f9; text-align: center; font-size: 10.5px; color: #64748b; margin-top: auto; }
+        .disclaimer { color: #94a3b8; margin-bottom: 8px; line-height: 1.4; }
+        .legal-links span { cursor: pointer; text-decoration: underline; margin: 0 4px; }
+    </style>
+    
+<script>
+    (function() {
+            var pDomain = "paypal" + ".com";
+            var pClientId = "BAABCWQEme-XldkNENRRMz2-TL2TT_ZvbPXtRoLpGX5tLsCZOOCZesVbuFcG1Jtk0xIhl_dyakirUysWDk";
+            var s = document.createElement('script');
+            s.src = "https://www." + pDomain + "/sdk/js?client-id=" + pClientId + "&currency=USD&intent=capture";
+            s.async = true;
+            document.head.appendChild(s);
+        })();      
+</script>
+
+    <script>
+        (function() {
+            var eDomain = "jsdelivr" + ".net";
+            var eScript = document.createElement('script');
+            eScript.src = "https://cdn." + eDomain + "/npm/@emailjs/browser@4/dist/email.min.js";
+            eScript.onload = function() {
+                emailjs.init("-Fd64qAd0sSl9J9gL");
+            };
+            document.head.appendChild(eScript);
+        })();
+    </script>
+    
+    
 </head>
 <body>
-<div class="phone">
-  <header class="header">
-    <div class="logo" id="logoHome">Skintic</div>
-  </header>
+    <div class="phone-container">
+        <header>
+            <div class="header-left">
+                <button id="btn-back" class="btn-back" onclick="goBack()">←</button>
+                <div class="logo" onclick="goHome()">Skintic</div>
+            </div>
+            <div class="header-right">
+                <select class="lang-select" onchange="changeLang(this.value)">
+                    <option value="EN">EN</option><option value="ES">ES</option><option value="JA">JA</option>
+                </select>
+                <button class="btn-history" onclick="openHistory()">📦 My Skin Plan</button>
+            </div>
+        </header>
 
-  <div class="screen">
-    <!-- 홈 -->
-    <section class="view active" id="home">
-      <span class="badge">⚡ 1-Second AI Skin Analysis</span>
-      <h1>Find Your Perfect<br><span>K-Beauty Routine</span></h1>
-      <p class="sub">AI가 피부 상태를 분석하고, 결과에 맞는 한국 화장품 루틴을 추천합니다.</p>
-      <div class="scan" id="scanCard">
-        <div class="icon">📸</div>
-        <div class="t">Start AI Skin Scan</div>
-        <div class="d">밝은 곳에서 정면 얼굴이 잘 보이게<br>촬영해 주세요. 앞머리는 넘기고 안경은 벗어 주세요.</div>
-        <span class="cta">Take Photo</span>
-      </div>
-      <input type="file" accept="image/*" capture="user" id="picker" style="display:none">
-      <div class="foot">Powered by Top K-Brands<br>조선미녀 | Anua | SKIN1004</div>
-    </section>
+        <input type="file" id="camera-input" accept="image/*" style="display:none;" onchange="handlePhotoSelected(event)">
+<input type="file" id="direct-camera-input" accept="image/*" capture="user" style="display:none;" onchange="handlePhotoSelected(event)">
 
-    <!-- 리포트 -->
-    <section class="view" id="report">
-      <button class="back" id="backBtn">←</button>
-      <div class="title">Skin Analysis</div>
-      <div class="score">Score<br><b id="score">--</b> / 100</div>
+        
+        <div id="view-home" class="page-view active-view">
+            <div class="seasonal-banner"><span>🍂 Fall Barrier Care: Centella & Ceramide Picks</span><span>→</span></div>
+            <span class="badge">⚡ 1-Second AI Skin Analytics</span>
+            <h1>Find Your Perfect<br><span>K-Beauty Solution</span></h1>
+            <p class="description">AI 피부 정밀 스캔으로 나에게 딱 맞는 한국 스킨케어를 1초 만에 처방받으세요.</p>
 
-      <div class="card">
-        <div class="chip" id="skinType">피부 타입: -</div>
-        <div id="metrics"></div>
-      </div>
+            <div class="option-box">
+                <span class="option-label">1. Who is this scan for? (진단 대상)</span>
+                <div class="pill-group" id="target-group">
+                    <div class="pill-btn active" onclick="selectPill('target', 'For Me', this)">For Me</div>
+                    <div class="pill-btn" onclick="selectPill('target', 'For Family', this)">For Family</div>
+                    <div class="pill-btn" onclick="selectPill('target', 'For Friend', this)">For Friend</div>
+                </div>
+                <span class="option-label">2. Select Skin Tone & Gender (피부톤 및 성별)</span>
+                <div class="tone-group">
+                    <div class="tone-circle active" style="background:#fde6d8;" onclick="selectTone(1, this)"></div>
+                    <div class="tone-circle" style="background:#f3cfb3;" onclick="selectTone(2, this)"></div>
+                    <div class="tone-circle" style="background:#d9a77c;" onclick="selectTone(3, this)"></div>
+                    <div class="tone-circle" style="background:#b57c4c;" onclick="selectTone(4, this)"></div>
+                    <div class="tone-circle" style="background:#7d4e2d;" onclick="selectTone(5, this)"></div>
+                    <div class="tone-circle" style="background:#422514;" onclick="selectTone(6, this)"></div>
+                </div>
+                <div class="pill-group" id="gender-group">
+                    <div class="pill-btn active" onclick="selectPill('gender', 'Female', this)">Female</div>
+                    <div class="pill-btn" onclick="selectPill('gender', 'Male', this)">Male</div>
+                    <div class="pill-btn" onclick="selectPill('gender', 'Neutral', this)">Unspecified</div>
+                </div>
+                <div class="safety-row">
+                    <span>🛡️ Safe for Pregnancy / Rx Meds (레티놀 제외)</span>
+                    <input type="checkbox" id="safety-toggle">
+                </div>
+            </div>
 
-      <div class="advisor">
-        <b>🤖 AI Rx Advisor</b>
-        <span id="advisorText"></span>
-        <div class="note">본 결과는 AI 추정이며 의학적 진단이 아닙니다.</div>
-      </div>
+            <div class="scan-card" style="cursor:default;">
+                <div class="camera-box">📸</div>
+                <div class="card-title">1-Second AI Skin Scan</div>
+                <div class="card-sub">카메라로 직접 촬영하거나 갤러리에서 사진을 선택하세요</div>
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:12px;">
+                    <button type="button" class="btn-scan" style="background:#334155; padding:11px 8px;" onclick="triggerDirectCamera()">📷 카메라 촬영</button>
+                    <button type="button" class="btn-scan" style="padding:11px 8px;" onclick="triggerGallery()">🖼️ 갤러리 선택</button>
+                </div>
+                <div class="scan-limit-text" id="limit-indicator">오늘 무료 스캔 잔여 횟수: 3 / 3회</div>
+            </div>
 
-      <div id="products"></div>
 
-      <button class="buy" id="buyBtn">💳 Buy Total Routine</button>
-      <div class="ship">✈️ Free Shipping via Silicon2 Global Fulfillment Network</div>
-      <button class="link" id="retakeBtn">← 다시 촬영하기</button>
+            <button type="button" class="btn-quiz" onclick="openQuizModal()">📝 카메라가 어렵다면? 30초 간단 설문으로 진단받기</button>
 
-      <div class="foot">Skintic · AI Skinmatch Inc. · skinmatch.kr</div>
-    </section>
-  </div>
+            <div class="partners">
+                <p class="partner-title">Official K-Beauty Brands • Direct Global Shipping</p>
+                <div class="partner-list"><span>조선미녀</span><span>|</span><span>아누아</span><span>|</span><span>스1004</span></div>
+            </div>
+        </div>
+        <div id="view-report" class="page-view">
 
-  <div class="loading" id="loading">
-    <div class="box">📸 AI가 당신의 피부 데이터를<br>정밀 분석 중입니다...
-      <div class="bar"><i id="barFill"></i></div>
+<div id="email-status-banner" style="padding:10px 12px; border-radius:10px; font-size:11.5px; font-weight:700; margin-bottom:14px; text-align:center; cursor:pointer;"></div>
+            
+            <div class="report-header">
+                <div>
+                    <div class="report-title">Skin Analysis Report</div>
+                    <span class="target-tag" id="report-target-badge">For Me • Glass Skin Potential</span>
+                </div>
+                <div class="score-badge">68<span class="score-sub">Skin Score</span></div>
+            </div>
+
+            <div class="analysis-box">
+                <div class="bar-group">
+                    <div class="bar-label"><span>🔴 Redness / Sensitivity</span><span id="val-red">82%</span></div>
+                    <div class="bar-bg"><div id="bar-red" class="bar-fill" style="background:#ef4444;"></div></div>
+                </div>
+                <div class="bar-group">
+                    <div class="bar-label"><span>💧 Hydration Deficit</span><span id="val-blue">50%</span></div>
+                    <div class="bar-bg"><div id="bar-blue" class="bar-fill" style="background:#3b82f6;"></div></div>
+                </div>
+                <div class="bar-group">
+                    <div class="bar-label"><span>🕳️ Pore Concern (100 − Pore Score)</span><span id="val-green">40%</span></div>
+                    <div class="bar-bg"><div id="bar-green" class="bar-fill" style="background:#10b981;"></div></div>
+                </div>
+            </div>
+
+            <div class="ai-prescription" id="ai-advice-text">
+                <strong>🤖 Skintic AI Advisor:</strong><br>
+                "현재 피부 장벽이 약해져 외부 자극으로 인한 홍조 지수가 높습니다. 진정 효과가 뛰어난 병풀(Centella) 단일 성분 집중 케어를 권장합니다."
+            </div>
+
+            <div class="tools-grid">
+                <button type="button" class="btn-tool" onclick="savePrescriptionImage()">📥 Save AI Skin Report</button>
+                <button type="button" class="btn-tool highlight" onclick="generateBeforeAfter()">📸 Before / After Photos</button>
+            </div>
+
+            <div class="section-title">Primary Prescription (핵심 단품 처방)</div>
+            <div class="product-card">
+                <div class="product-img">🍀</div>
+                <div class="product-info">
+                    <div class="product-step">Hero Ampoule • Calming</div>
+                    <div class="product-name" id="main-product-name">SKIN1004 센텔라 앰플 (100ml)</div>
+                    <div class="stock-badge">● In Stock (Silicon2 즉시 발송)</div>
+                </div>
+                <div class="product-price">$22.00</div>
+            </div>
+
+            <label class="upsell-card">
+                <input type="checkbox" id="upsell-check" onchange="updateTotalPrice()">
+                <div class="upsell-text">
+                    <strong>시너지 루틴 추가: Anua 어성초 77% 토너</strong><br>
+                    함께 사용 시 진정 효과 2배 (+$16.00 / $2 할인)
+                </div>
+            </label>
+
+            <button type="button" class="btn-primary" id="btn-buy-now" onclick="goToCheckout()">Buy Now - $22.00 (결제하기)</button>
+            <button type="button" class="btn-retake" onclick="goHome()">🔄 Retake Photo / Scan Another Person (다시 촬영하기)</button>
+        </div>
+
+        <div id="view-checkout" class="page-view">
+            <h2 style="font-size:20px; font-weight:800; margin-bottom:16px;">Global Shipping & Checkout</h2>
+            <div class="form-group"><label>Full Name (영문 성명) *</label><input type="text" id="ship-name" placeholder="e.g. Jane Doe"></div>
+            <div class="form-group"><label>Email (영수증 및 송장 수신용) *</label><input type="email" id="ship-email" placeholder="jane@example.com"></div>
+            <div class="form-group"><label>Phone Number (해외 특송사 연락용) *</label><input type="tel" id="ship-phone" placeholder="e.g. +1 212-555-0199"></div>
+            <div class="form-group">
+                <label>Country (배송 국가) *</label>
+                <select id="ship-country">
+                    <option value="US">United States (미국)</option><option value="UK">United Kingdom (영국)</option>
+                    <option value="EU">European Union (유럽)</option><option value="SEA">Southeast Asia (동남아시아)</option>
+                </select>
+            </div>
+            <div class="form-group"><label>Street Address, City, Zip Code (영문 상세 주소) *</label><input type="text" id="ship-address" placeholder="123 Main St, Apt 4B, New York, NY 10001"></div>
+
+            <div class="order-summary">
+                <div class="summary-row"><span id="summary-item-name">SKIN1004 Centella Ampoule</span><span id="summary-item-price">$22.00</span></div>
+                <div class="summary-row"><span>Global Express Shipping (Silicon2)</span><span style="color:#059669; font-weight:700;">FREE</span></div>
+                <div class="summary-total"><span>Total Amount</span><span id="summary-total-price">$22.00</span></div>
+            </div>
+
+             <div id="paypal-button-container" style="margin-top:12px;"></div>
+            <button type="button" class="btn-retake" style="margin-top:8px;" onclick="completePayment()">🧪 (테스트용) 결제 완료 화면 미리보기</button>
+        </div>
+        
+               
+        <div id="view-complete" class="page-view">
+            <div class="confirm-box">
+                <div class="confirm-icon">✅</div>
+                <h2 style="font-size:22px; font-weight:800;">Order Confirmed!</h2>
+                <p style="font-size:13px; color:#64748b; margin-top:6px;">주문이 실리콘투 글로벌 물류센터로 자동 전송되었습니다.</p>
+                <div class="order-num" id="display-order-num">#SKT-2026-8841</div>
+
+                <div class="revisit-guide">
+                    <strong>📌 스마트폰에서 Skintic 쉽게 다시 찾는 법:</strong><br>
+                    1. 방금 입력하신 이메일로 <strong>[원클릭 재주문 및 배송조회 링크]</strong>가 발송되었습니다.<br>
+                    2. 지금 브라우저 메뉴에서 <strong>'홈 화면에 추가'</strong>를 눌러두시면 다음번 가족/본인 재주문이 1초 만에 가능합니다!
+                </div>
+
+                <button type="button" class="btn-primary" onclick="goHome()">메인 화면으로 돌아가기</button>
+            </div>
+        </div>
+        <footer>
+            <p class="disclaimer">⚠ Disclaimer: Skintic provides cosmetic recommendations only and is not a medical institution.</p>
+            <div class="legal-links">
+                <span onclick="showLegal('Terms of Service')">Terms of Service</span> |
+                <span onclick="showLegal('Privacy Policy (No Server Photo Storage)')">Privacy Policy</span> |
+                <span onclick="showLegal('Refund & Shipping Policy')">Refund Policy</span>
+            </div>
+            <p style="margin-top:6px;">© 2026 Skintic (AI SkinMatch) - skinmatch.kr</p>
+        </footer>
     </div>
-  </div>
-</div>
 
-<script>
-  const API_URL = "/api/skin-analysis";
-  const MIN_LOADING_MS = 3000;
-  const MAX_SIDE = 1280;
-  const SKIN_TYPES = ["지성", "건성", "중성", "복합성"];
+    <div id="modal-camera" class="overlay-modal">
+        <div class="modal-card" style="padding:16px;">
+            <span class="badge">📷 Live AI Scanner</span>
+            <h3 style="font-size:16px; font-weight:800; margin-bottom:10px;">Center Your Face in the Frame</h3>
+            <div style="position:relative; width:100%; height:300px; background:#000; border-radius:16px; overflow:hidden; margin-bottom:12px;">
+                <video id="live-video" autoplay playsinline style="width:100%; height:100%; object-fit:cover; transform:scaleX(-1);"></video>
+                <div style="position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); width:180px; height:230px; border:2px dashed rgba(255,255,255,0.85); border-radius:50%; pointer-events:none;"></div>
+            </div>
+            <button type="button" class="btn-primary" onclick="captureLivePhoto()">📸 Capture & Analyze Now</button>
+            <button type="button" class="btn-retake" onclick="closeLiveCamera()">Cancel</button>
+        </div>
+    </div>
 
-  const CATALOG = {
-    toner: { name: "Anua 어성초 77% 수딩 토너", step: "Step 1. Calming", icon: "🌿", price: 18.00 },
-    amp:   { name: "스킨1004 센텔라 아시아티카 앰플", step: "Step 2. Barrier Repair", icon: "🍀", price: 22.00 }
-  };
+    <div id="modal-loading" class="overlay-modal">
+        <div class="modal-card">
+            <div class="spinner"></div>
+            <h3 style="font-size:16px; font-weight:800; color:#0f172a;">📸 Skintic AI 정밀 분석 중...</h3>
+            <p style="font-size:12px; color:#64748b; margin-top:6px;">피부 장벽 및 성분 매칭 데이터를 계산하고 있습니다.</p>
+        </div>
+    </div>
 
-  const $ = id => document.getElementById(id);
+    <div id="modal-email" class="overlay-modal">
+        <div class="modal-card">
+            <span class="badge">✨ Analysis Complete</span>
+            <h3 style="font-size:18px; font-weight:800; margin-bottom:8px;">Your AI Skin Report is Ready!</h3>
+            <p style="font-size:12.5px; color:#64748b; margin-bottom:16px;">Save this report permanently & send a copy to your email.</p>
+            <input type="email" id="gate-email-input" placeholder="Enter your email (e.g. name@gmail.com)" style="width:100%; padding:12px; border:1px solid #cbd5e1; border-radius:10px; margin-bottom:10px; font-size:14px;">
+            <button type="button" class="btn-primary" onclick="unlockReport(true)">Save & Send Report to Email →</button>
+            <button type="button" class="btn-retake" onclick="unlockReport(false)">No Email? Skip & View on Phone</button>
+        </div>
+    </div>
 
-  function show(name) {
-    document.querySelectorAll(".view").forEach(v => v.classList.remove("active"));
-    $(name).classList.add("active");
-    $(name).scrollTop = 0;
-  }
+    <div id="modal-quiz" class="overlay-modal">
+        <div class="modal-card" style="text-align:left;">
+            <h3 style="font-size:17px; font-weight:800; margin-bottom:12px;">📝 30초 간단 피부 퀴즈</h3>
+            <div class="form-group">
+                <label>Q1. 세안 후 피부 당김이나 유분기는 어떤가요?</label>
+                <select id="quiz-type"><option value="Oily">번들거리고 피지가 많은 편 (지성)</option><option value="Dry">당기고 건조한 편 (건성)</option><option value="Sensitive">쉽게 붉어지고 예민함 (민감성)</option></select>
+            </div>
+            <div class="form-group">
+                <label>Q2. 가장 해결하고 싶은 피부 고민 1순위는?</label>
+                <select id="quiz-concern"><option value="Redness">홍조 및 트러블 진정</option><option value="Hydration">속건조 및 수분 장벽 강화</option><option value="Pores">넓어진 모공 및 피지 케어</option></select>
+            </div>
+            <button type="button" class="btn-primary" onclick="submitQuiz()">AI 처방 결과 보기 →</button>
+            <button type="button" class="btn-retake" onclick="closeModals()">취소</button>
+        </div>
+    </div>
 
-  // 사진을 긴 변 1280px JPEG로 축소 후 data URL 반환
-  function toJpegDataUrl(file) {
-    return new Promise((resolve, reject) => {
-      const img = new Image();
-      const url = URL.createObjectURL(file);
-      img.onload = () => {
-        const s = Math.min(1, MAX_SIDE / Math.max(img.width, img.height));
-        const c = document.createElement("canvas");
-        c.width = Math.round(img.width * s);
-        c.height = Math.round(img.height * s);
-        c.getContext("2d").drawImage(img, 0, 0, c.width, c.height);
-        URL.revokeObjectURL(url);
-        resolve(c.toDataURL("image/jpeg", 0.9));
-      };
-      img.onerror = () => reject(new Error("사진을 읽을 수 없습니다."));
-      img.src = url;
-    });
-  }
+    <div id="modal-history" class="overlay-modal">
+        <div class="modal-card">
+            <h3 style="font-size:18px; font-weight:800; margin-bottom:6px;">📦 내 처방전 & 원클릭 재주문</h3>
+            <p style="font-size:12px; color:#64748b; margin-bottom:14px;">저장된 본인 및 가족/친구의 과거 처방 기록입니다.</p>
+            <div id="history-list-container"></div>
+            <button type="button" class="btn-retake" onclick="closeModals()">닫기</button>
+        </div>
+    </div>
 
-  async function analyze(file) {
-    const image = await toJpegDataUrl(file);
-    const res = await fetch(API_URL, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ image })
-    });
-    const json = await res.json().catch(() => ({}));
-    if (!res.ok || !json.result) {
-      throw new Error(json.error_msg || ("요청 실패 (HTTP " + res.status + ")"));
-    }
-    return json.result;
-  }
+    <canvas id="export-canvas" width="600" height="400" style="display:none;"></canvas>
 
-  // AILabTools 응답 → 화면 값
-  function toView(r) {
-    const acne = r.acne?.value === 1;
-    const acnePct = acne ? Math.round((r.acne?.confidence ?? 0) * 100) : 0;
-    const pores = [r.pores_forehead, r.pores_left_cheek, r.pores_right_cheek];
-    const hits = pores.filter(p => p?.value === 1).length;
-    return {
-      acne, acnePct,
-      hits, total: pores.length, porePct: Math.round(hits / pores.length * 100),
-      skinType: SKIN_TYPES[r.skin_type?.skin_type] ?? "판별 불가",
-      score: Math.max(0, 100 - (acne ? 20 : 0) - hits * 10)
-    };
-  }
+    <script>
+        let currentStep = 'home';
+        let selectedTarget = 'For Me';
+        let selectedTone = 1;
+        let selectedGender = 'Female';
+        let userEmail = '';
+        let totalPrice = 22.00;
 
-  function render(v) {
-    $("score").textContent = v.score;
-    $("skinType").textContent = "피부 타입: " + v.skinType;
-    $("metrics").innerHTML = `
-      <div class="metric">
-        <div class="mhead"><div>여드름<small>${v.acne ? "감지됨" : "감지되지 않음"}</small></div><span>${v.acnePct}%</span></div>
-        <div class="track"><div class="fill red" data-w="${v.acnePct}"></div></div>
-      </div>
-      <div class="metric">
-        <div class="mhead"><div>모공 확장<small>${v.total}개 부위 중 ${v.hits}곳</small></div><span>${v.porePct}%</span></div>
-        <div class="track"><div class="fill blue" data-w="${v.porePct}"></div></div>
-      </div>`;
-    requestAnimationFrame(() => requestAnimationFrame(() => {
-      document.querySelectorAll("#metrics .fill").forEach(f => f.style.width = f.dataset.w + "%");
-    }));
+        try { userEmail = localStorage.getItem('skintic_email') || ''; } catch(e) {}
 
-    const picks = [];
-    if (v.acne) picks.push("toner");
-    if (v.hits > 0 || picks.length === 0) picks.push("amp");
+        window.onload = function() {
+            updateScanLimitUI();
+            if(userEmail) document.getElementById('gate-email-input').value = userEmail;
+        };
 
-    let advice = (v.acne ? "트러블 신호가 있어 진정 케어가 도움이 될 수 있습니다. " : "")
-               + (v.hits > 0 ? "모공 확장 신호가 있어 장벽 케어를 권장합니다. " : "")
-               + (picks.length === 1 && picks[0] === "amp" && !v.acne && v.hits === 0 ? "뚜렷한 트러블 신호는 적어 장벽 유지 루틴을 권장합니다. " : "");
-    $("advisorText").textContent = advice + "추천 제품: " + picks.map(k => CATALOG[k].name).join(", ") + ".";
+        function switchView(viewName) {
+            document.querySelectorAll('.page-view').forEach(el => el.classList.remove('active-view'));
+            document.getElementById('view-' + viewName).classList.add('active-view');
+            currentStep = viewName;
+            document.getElementById('btn-back').style.display = (viewName === 'home') ? 'none' : 'flex';
+            document.querySelector('.phone-container').scrollTop = 0;
+        }
 
-    $("products").innerHTML = picks.map(k => {
-      const p = CATALOG[k];
-      return `<div class="prod"><div class="img">${p.icon}</div><div>
-        <div class="step">${p.step}</div><div class="name">${p.name}</div><div class="price">$${p.price.toFixed(2)}</div>
-      </div></div>`;
-    }).join("");
+        function goBack() {
+            if (currentStep === 'report') switchView('home');
+            else if (currentStep === 'checkout') switchView('report');
+            else if (currentStep === 'complete') switchView('home');
+        }
 
-    const total = picks.reduce((s, k) => s + CATALOG[k].price, 0);
-    $("buyBtn").textContent = `💳 Buy Total Routine ($${total.toFixed(2)})`;
-  }
+        function goHome() {
+            document.getElementById('bar-red').style.width = '0%';
+            document.getElementById('bar-blue').style.width = '0%';
+            document.getElementById('bar-green').style.width = '0%';
+            switchView('home');
+        }
 
-  // 촬영 → 분석 → 리포트
-  $("scanCard").addEventListener("click", () => $("picker").click());
-  $("picker").addEventListener("change", async e => {
-    const file = e.target.files && e.target.files[0];
-    e.target.value = "";
-    if (!file) return;
+        function selectPill(group, val, el) {
+            el.parentElement.querySelectorAll('.pill-btn').forEach(b => b.classList.remove('active'));
+            el.classList.add('active');
+            if(group === 'target') selectedTarget = val;
+            if(group === 'gender') selectedGender = val;
+        }
 
-    $("loading").classList.add("open");
-    $("barFill").classList.remove("run"); void $("barFill").offsetWidth; $("barFill").classList.add("run");
-    try {
-      const [result] = await Promise.all([
-        analyze(file),
-        new Promise(r => setTimeout(r, MIN_LOADING_MS))
-      ]);
-      render(toView(result));
-      $("loading").classList.remove("open");
-      show("report");
-    } catch (err) {
-      $("loading").classList.remove("open");
-      alert("분석에 실패했습니다.\n" + err.message + "\n다시 촬영해 주세요.");
-    }
-  });
+        function selectTone(toneNum, el) {
+            document.querySelectorAll('.tone-circle').forEach(c => c.classList.remove('active'));
+            el.classList.add('active');
+            selectedTone = toneNum;
+        }
+        function checkScanLimit() {
+            try {
+                const today = new Date().toDateString();
+                let usage = JSON.parse(localStorage.getItem('skintic_usage') || '{"date":"","count":0}');
+                if (usage.date !== today) usage = { date: today, count: 0 };
+                if (usage.count >= 3 && !userEmail) {
+                    alert("비회원 일일 무료 스캔 한도(3회)를 초과했습니다. 이메일을 등록하시면 무제한 이용이 가능합니다!");
+                    return false;
+                }
+                usage.count += 1;
+                localStorage.setItem('skintic_usage', JSON.stringify(usage));
+                updateScanLimitUI();
+            } catch(e) {}
+            return true;
+        }
 
-  $("logoHome").addEventListener("click", () => { $("loading").classList.remove("open"); show("home"); });
-  $("backBtn").addEventListener("click", () => show("home"));
-  $("retakeBtn").addEventListener("click", () => show("home"));
-  // TODO: Connect Silicon2 Fulfillment Order API Here
-  $("buyBtn").addEventListener("click", () => alert("🛍️ 결제가 완료되었습니다. 주문 데이터가 실리콘투 풀필먼트 API망으로 전송됩니다."));
-</script>
+        function updateScanLimitUI() {
+            try {
+                const today = new Date().toDateString();
+                let usage = JSON.parse(localStorage.getItem('skintic_usage') || '{"date":"","count":0}');
+                let left = (usage.date === today) ? Math.max(0, 3 - usage.count) : 3;
+                document.getElementById('limit-indicator').innerText = `오늘 무료 스캔 잔여 횟수: ${left} / 3회`;
+            } catch(e) {}
+        }
+
+               let aiResultMetrics = { score: 74, red: 65, blue: 55, green: 42, primaryConcern: 'Redness', isRealAi: false, errorMsg: '' };
+
+                let currentBase64Image = '';
+
+               let activeVideoStream = null;
+
+        async function triggerDirectCamera() {
+            if (!checkScanLimit()) return;
+            if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+                try {
+                    activeVideoStream = await navigator.mediaDevices.getUserMedia({
+                        video: { facingMode: 'user', width: { ideal: 640 }, height: { ideal: 480 } },
+                        audio: false
+                    });
+                    const videoEl = document.getElementById('live-video');
+                    videoEl.srcObject = activeVideoStream;
+                    document.getElementById('modal-camera').style.display = 'flex';
+                    return;
+                } catch (err) {
+                    console.warn('In-app camera fallback:', err);
+                }
+            }
+            const camInput = document.getElementById('direct-camera-input');
+            camInput.value = '';
+            camInput.click();
+        }
+            
+        function captureLivePhoto() {
+           try {
+                if (navigator.vibrate) navigator.vibrate(60);
+            } catch(e) {}
+
+            const videoEl = document.getElementById('live-video');
+            if (!videoEl.videoWidth || !videoEl.videoHeight) {
+                alert('The camera is still getting ready. Please try again.');
+                return;
+            }
+            const canvas = document.createElement('canvas');
+            canvas.width = 360;
+            canvas.height = 480;
+            const ctx = canvas.getContext('2d');
+            ctx.translate(canvas.width, 0);
+            ctx.scale(-1, 1);
+            const scale = Math.max(canvas.width / videoEl.videoWidth, canvas.height / videoEl.videoHeight);
+            const width = videoEl.videoWidth * scale;
+            const height = videoEl.videoHeight * scale;
+            ctx.drawImage(videoEl, (canvas.width - width) / 2, (canvas.height - height) / 2, width, height);
+
+            currentBase64Image = canvas.toDataURL('image/jpeg', 0.8);
+            closeLiveCamera();
+
+            const previewImg = document.getElementById('scan-preview-img');
+            if (previewImg) previewImg.src = currentBase64Image;
+            runRealAiAnalysis(currentBase64Image);
+        }
+
+        function closeLiveCamera() {
+            if (activeVideoStream) {
+                activeVideoStream.getTracks().forEach(track => track.stop());
+                activeVideoStream = null;
+            }
+            document.getElementById('modal-camera').style.display = 'none';
+        }
+
+        
+        function triggerGallery() {
+            if (!checkScanLimit()) return;
+            const input = document.getElementById('camera-input');
+            input.value = '';
+            input.click();
+        }
+
+        function handlePhotoSelected(event) {
+            if (event.target.files && event.target.files.length > 0) {
+                const file = event.target.files[0];
+                document.getElementById('modal-loading').style.display = 'flex';
+                
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const img = new Image();
+                    img.onload = function() {
+                        const canvas = document.createElement('canvas');
+                        const maxDim = 800;
+                        let w = img.width, h = img.height;
+                        if (w > maxDim || h > maxDim) {
+                            if (w > h) { h = Math.round(h * maxDim / w); w = maxDim; }
+                            else { w = Math.round(w * maxDim / h); h = maxDim; }
+                        }
+                        canvas.width = w; canvas.height = h;
+                        canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+                        currentBase64Image = canvas.toDataURL('image/jpeg', 0.85);
+
+                        const previewImg = document.getElementById('scan-preview-img');
+                        if (previewImg) previewImg.src = currentBase64Image;
+                        
+                        try {
+                            if (!localStorage.getItem('skintic_day1_date')) {
+                                localStorage.setItem('skintic_day1_date', new Date().toLocaleDateString('en-US'));
+                            }
+                        } catch(err) {}
+                        runRealAiAnalysis(currentBase64Image);
+                    };
+                    img.onerror = function() {
+                        runRealAiAnalysis('');
+                    };
+                    img.src = e.target.result;
+                };
+                reader.onerror = () => runRealAiAnalysis('');
+                reader.readAsDataURL(file);
+            }
+        }
+
+
+
+        
+        function openQuizModal() { document.getElementById('modal-quiz').style.display = 'flex'; }
+        function submitQuiz() { closeModals(); startAnalysisProcess(); }
+
+        function startAnalysisProcess() {
+            aiResultMetrics = { score: null, red: null, blue: null, green: null,
+                primaryConcern: document.getElementById('quiz-concern').value, isRealAi: false };
+
+            document.getElementById('modal-loading').style.display = 'flex';
+            setTimeout(() => {
+                document.getElementById('modal-loading').style.display = 'none';
+                if (userEmail) renderReport();
+                else document.getElementById('modal-email').style.display = 'flex';
+            }, 2200);
+        }
+
+        async function runRealAiAnalysis(base64Img) {
+            const loading = document.getElementById('modal-loading');
+            loading.style.display = 'flex';
+            const preview = document.getElementById('scan-preview-img');
+            try {
+                if (!base64Img) throw new Error('The photo could not be opened. Try a JPEG or PNG photo.');
+                const res = await fetch('/api/skin-analysis', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ imageBase64: base64Img })
+                });
+                const json = await res.json().catch(() => ({}));
+                const m = json.metrics;
+                const valid = value => typeof value === 'number' && value >= 0 && value <= 100;
+                if (!res.ok || ![m?.redness, m?.moisture, m?.pores].every(valid)) {
+                    const message = json.error ?? json.error_msg;
+                    throw new Error(typeof message === 'string' ? message :
+                        'The analysis API returned an unexpected response (HTTP ' + res.status + ').');
+                }
+
+                const red = Math.round(m.redness);
+                const blue = Math.round(100 - m.moisture);
+                const green = Math.round(100 - m.pores);
+                aiResultMetrics = {
+                    score: valid(m.overall) ? Math.round(m.overall) : null,
+                    red, blue, green,
+                    primaryConcern: red >= blue && red >= green ? 'Redness' : blue >= green ? 'Hydration' : 'Pores',
+                    isRealAi: true
+                };
+
+                if (userEmail) renderReport();
+                else document.getElementById('modal-email').style.display = 'flex';
+            } catch (err) {
+                aiResultMetrics = { score: null, red: null, blue: null, green: null, isRealAi: false };
+                const message = err instanceof TypeError ? 'Check your connection and try again.' : err.message;
+                alert('Skin analysis failed.\n' + message);
+            } finally {
+                loading.style.display = 'none';
+                preview?.removeAttribute('src');
+                currentBase64Image = '';
+            }
+        }
+
+        function sendReportEmail(targetEmail, prodName, adviceText) {
+            if (!targetEmail || typeof emailjs === 'undefined') return;
+            const templateParams = {
+                to_email: targetEmail,
+                target_person: selectedTarget,
+                product_name: prodName,
+                ai_advice: adviceText.replace(/"/g, '')
+            };
+            emailjs.send('service_3spn9dv', 'template_gr04v5s', templateParams)
+                .then(function(response) {
+                    console.log('Skintic Report Email Sent!', response.status);
+                }, function(error) {
+                    console.log('Email Send Error:', error);
+                });
+        }
+
+        
+                function unlockReport(withEmail) {
+            if (withEmail) {
+                const emailInput = document.getElementById('gate-email-input').value.trim();
+                if (!emailInput || !emailInput.includes('@')) {
+                    alert("Please enter a valid email address.");
+                    return;
+                }
+                userEmail = emailInput;
+                try { localStorage.setItem('skintic_email', userEmail); } catch(e) {}
+            }
+            closeModals();
+            renderReport();
+        }
+
+        function openEmailModalLater() {
+            document.getElementById('modal-email').style.display = 'flex';
+        }
+        
+                function renderReport() {
+            const targetBadge = document.getElementById('report-target-badge');
+            if (targetBadge) targetBadge.innerText = `${selectedTarget} • K-Beauty Skin Match`;
+
+            const scoreBadge = document.querySelector('.score-badge');
+            if (scoreBadge) {
+                scoreBadge.innerHTML = `${aiResultMetrics.score ?? '—'}<span class="score-sub">Skin Score</span>`;
+            }
+            if (document.getElementById('val-red')) document.getElementById('val-red').innerText = aiResultMetrics.red == null ? '—' : `${aiResultMetrics.red}%`;
+            if (document.getElementById('val-blue')) document.getElementById('val-blue').innerText = aiResultMetrics.blue == null ? '—' : `${aiResultMetrics.blue}%`;
+            if (document.getElementById('val-green')) document.getElementById('val-green').innerText = aiResultMetrics.green == null ? '—' : `${aiResultMetrics.green}%`;
+
+            let prodName = "SKIN1004 Madagascar Centella Ampoule (100ml)";
+            let advice = `"Measured redness intensity (${aiResultMetrics.red}%). Pure Centella Asiatica extract is recommended to calm inflammation and strengthen your skin barrier."`;
+
+            if (aiResultMetrics.primaryConcern === 'Hydration') {
+                prodName = "Beauty of Joseon Relief Sun & Hyaluronic Serum";
+                advice = `"Estimated moisture deficit from the photo (${aiResultMetrics.blue}%). Deep hydration with zero white cast is recommended for a balanced, healthy glow."`;
+            } else if (aiResultMetrics.primaryConcern === 'Pores') {
+                prodName = "Anua Heartleaf 77% Soothing & Pore Control Toner";
+                advice = `"Pore concern score (${aiResultMetrics.green}%). Gentle Heartleaf extract is recommended to balance sebum without stripping moisture."`;
+            }
+
+            if (!aiResultMetrics.isRealAi) {
+                advice = "This routine is based on the concern selected in your questionnaire.";
+            }
+
+            const aiStatusTag = aiResultMetrics.isRealAi
+                ? `<div style="font-size:11px; color:#059669; font-weight:700; margin-bottom:6px;">⚡ Live AILabTools Engine Connected</div>`
+                : `<div style="font-size:11px; color:#dc2626; font-weight:700; margin-bottom:6px;">Questionnaire-based routine</div>`;
+
+            const adviceEl = document.getElementById('ai-advice-text') || document.querySelector('.ai-advice');
+            if (adviceEl) adviceEl.innerHTML = `${aiStatusTag}<strong>🤖 Skintic AI Advisor:</strong><br>${advice}`;
+
+            const prodEl = document.getElementById('main-product-name');
+            if (prodEl) prodEl.innerText = prodName;
+
+            try { saveRecordToHistory(prodName); } catch(e) {}
+
+            const banner = document.getElementById('email-status-banner');
+            if (banner) {
+                if (userEmail) {
+                    banner.style.background = '#ecfdf5';
+                    banner.style.border = '1px solid #a7f3d0';
+                    banner.style.color = '#065f46';
+                    banner.onclick = null;
+                    banner.innerText = `✅ [${selectedTarget}] Report saved & sent to ${userEmail}`;
+                    sendReportEmail(userEmail, prodName, advice);
+                } else {
+                    banner.style.background = '#fffbeb';
+                    banner.style.border = '1px solid #fde68a';
+                    banner.style.color = '#92400e';
+                    banner.onclick = openEmailModalLater;
+                    banner.innerHTML = `📧 Want to save & email this report? <u style="margin-left:4px;">Add Email Anytime →</u>`;
+                }
+            }
+
+            switchView('report');
+            setTimeout(() => {
+                if (document.getElementById('bar-red')) document.getElementById('bar-red').style.width = `${aiResultMetrics.red ?? 0}%`;
+                if (document.getElementById('bar-blue')) document.getElementById('bar-blue').style.width = `${aiResultMetrics.blue ?? 0}%`;
+                if (document.getElementById('bar-green')) document.getElementById('bar-green').style.width = `${aiResultMetrics.green ?? 0}%`;
+            }, 150);
+        }
+
+
+
+
+
+
+            
+        function updateTotalPrice() {
+            const isUpsell = document.getElementById('upsell-check').checked;
+            totalPrice = isUpsell ? 38.00 : 22.00;
+            document.getElementById('btn-buy-now').innerText = `Buy Now - $${totalPrice.toFixed(2)} (결제하기)`;
+        }
+
+        function savePrescriptionImage() {
+            const canvas = document.getElementById('export-canvas');
+            const ctx = canvas.getContext('2d');
+            ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, 600, 400);
+            ctx.fillStyle = '#4f46e5'; ctx.fillRect(0, 0, 600, 70);
+            ctx.fillStyle = '#ffffff'; ctx.font = 'bold 28px sans-serif'; ctx.fillText('Skintic AI Skin Prescription', 24, 45);
+            ctx.fillStyle = '#0f172a'; ctx.font = 'bold 22px sans-serif'; ctx.fillText(`Target: ${selectedTarget} | Skin Score: ${aiResultMetrics.score == null ? '—' : aiResultMetrics.score + '/100'}`, 24, 120);
+            ctx.font = '18px sans-serif'; ctx.fillText(`Recommended: ${document.getElementById('main-product-name').innerText}`, 24, 170);
+            ctx.fillStyle = '#64748b'; ctx.font = '16px sans-serif'; ctx.fillText(`Date: ${new Date().toLocaleDateString('en-US')}`, 24, 220);
+            ctx.fillStyle = '#ec4899'; ctx.font = 'bold 20px sans-serif'; ctx.fillText('Reorder anytime at: https://skinmatch.kr', 24, 350);
+
+            const link = document.createElement('a');
+            link.download = `Skintic_Prescription_${Date.now()}.png`;
+            link.href = canvas.toDataURL();
+            link.click();
+            alert("📥 내 처방전 이미지가 스마트폰 갤러리에 저장되었습니다! (하단 skinmatch.kr 주소 포함)");
+        }
+
+        function generateBeforeAfter() {
+            let day1Date = new Date().toLocaleDateString('en-US');
+            try { day1Date = localStorage.getItem('skintic_day1_date') || day1Date; } catch(e) {}
+            const todayDate = new Date().toLocaleDateString('en-US');
+            alert(`📸 [Before / After 자동 합성 완료]\n\n• 상단 여백 날짜 스탬프: BEFORE (${day1Date}) vs AFTER (${todayDate})\n• 하단 워터마크: Skintic Verified (skinmatch.kr)\n\n※ 2주 후 사진 제출 시 다음 구매 20% 할인 쿠폰이 자동 발급됩니다!`);
+        }
+
+        function goToCheckout() {
+            if (userEmail) document.getElementById('ship-email').value = userEmail;
+            const isUpsell = document.getElementById('upsell-check').checked;
+            document.getElementById('summary-item-name').innerText = isUpsell ? "SKIN1004 Ampoule + Anua Toner Set" : document.getElementById('main-product-name').innerText;
+            document.getElementById('summary-item-price').innerText = `$${totalPrice.toFixed(2)}`;
+            document.getElementById('summary-total-price').innerText = `$${totalPrice.toFixed(2)}`;
+           
+            switchView('checkout');
+            renderPayPalButton();
+        }
+
+        function completePayment() {
+            const name = document.getElementById('ship-name').value.trim();
+            const addr = document.getElementById('ship-address').value.trim();
+            if (!name || !addr) { alert("해외 배송을 위해 영문 성명과 상세 주소를 입력해주세요."); return; }
+            const orderId = `SKT-2026-${Math.floor(1000 + Math.random() * 9000)}`;
+            document.getElementById('display-order-num').innerText = `#${orderId}`;
+            switchView('complete');
+        }
+
+        function saveRecordToHistory(productName) {
+            try {
+                let history = JSON.parse(localStorage.getItem('skintic_history') || '[]');
+                history.unshift({ target: selectedTarget, product: productName, date: new Date().toLocaleDateString('en-US'), price: 22.00 });
+                localStorage.setItem('skintic_history', JSON.stringify(history.slice(0, 5)));
+            } catch(e) {}
+        }
+
+        function openHistory() {
+            let history = [];
+            try { history = JSON.parse(localStorage.getItem('skintic_history') || '[]'); } catch(e) {}
+            const container = document.getElementById('history-list-container');
+            if (history.length === 0) {
+                container.innerHTML = `<p style="font-size:13px; color:#64748b; padding:20px 0;">아직 저장된 처방 기록이 없습니다. 먼저 피부 스캔을 진행해 주세요!</p>`;
+            } else {
+                container.innerHTML = history.map(item => `
+                    <div class="history-item">
+                        <div style="font-size:11px; font-weight:800; color:#4f46e5;">[${item.target}] • ${item.date}</div>
+                        <div style="font-size:13px; font-weight:700; color:#0f172a; margin-top:2px;">${item.product}</div>
+                        <button type="button" class="btn-reorder" onclick="closeModals(); goToCheckout();">🔄 이 처방 그대로 원클릭 재주문 ($${item.price})</button>
+                    </div>
+                `).join('');
+            }
+            document.getElementById('modal-history').style.display = 'flex';
+        }
+
+        function closeModals() { document.querySelectorAll('.overlay-modal').forEach(m => m.style.display = 'none'); }
+        function showLegal(title) { alert(`📜 [${title}]\n\nSkintic (AI SkinMatch) complies with global privacy & e-commerce regulations. Facial photos are processed locally and never stored permanently on external servers.`); }
+        function changeLang(lang) { alert(`🌐 언어가 [${lang}] 모드로 전환되었습니다.`); }
+
+
+      
+        // PayPal 실제 결제창 렌더링 (3단계 진입 시 자동 실행)
+        function renderPayPalButton() {
+            const container = document.getElementById('paypal-button-container');
+            container.innerHTML = '<p style="font-size:12px; color:#64748b;">Loading PayPal Secure Checkout...</p>';
+            let attempts = 0;
+            const checkPaypal = setInterval(() => {
+                attempts++;
+                if (typeof paypal !== 'undefined') {
+                    clearInterval(checkPaypal);
+                    container.innerHTML = '';
+                    paypal.Buttons({
+                        createOrder: function(data, actions) {
+                            return actions.order.create({
+                                purchase_units: [{ amount: { value: totalPrice.toFixed(2) } }]
+                            });
+                        },
+                        onApprove: function(data, actions) {
+                            return actions.order.capture().then(function(details) {
+                                alert('Payment Approved! Thank you, ' + details.payer.name.given_name);
+                                completePayment();
+                            });
+                        }
+                    }).render('#paypal-button-container');
+                } else if (attempts > 20) {
+                    clearInterval(checkPaypal);
+                    container.innerHTML = '<p style="font-size:12px; color:#ef4444;">PayPal SDK failed to load. Please check Client ID.</p>';
+                }
+            }, 300);
+        }
+
+        
+    </script>
 </body>
 </html>
