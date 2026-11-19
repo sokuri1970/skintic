@@ -22,16 +22,28 @@
         h1 { font-size: 26px; font-weight: 800; color: #0f172a; line-height: 1.25; margin-bottom: 8px; text-align: center; }
         h1 span { color: #4f46e5; font-weight: 900; }
         .description { font-size: 13px; color: #64748b; line-height: 1.5; margin: 0 auto 20px; text-align: center; }
-        .option-box { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 16px; padding: 14px; margin-bottom: 18px; }
-        .option-label { font-size: 11px; font-weight: 800; color: #475569; text-transform: uppercase; margin-bottom: 8px; display: block; }
-        .pill-group { display: flex; gap: 8px; margin-bottom: 12px; }
-        .pill-btn { flex: 1; padding: 8px 4px; border: 1px solid #cbd5e1; border-radius: 10px; background: #fff; font-size: 12px; font-weight: 700; color: #475569; cursor: pointer; text-align: center; }
-        .pill-btn.active { background: #4f46e5; color: #fff; border-color: #4f46e5; }
-        .tone-group { display: flex; justify-content: space-between; gap: 6px; margin-bottom: 12px; }
-        .tone-circle { width: 34px; height: 34px; border-radius: 50%; cursor: pointer; border: 2px solid transparent; }
-        .tone-circle.active { border: 3px solid #4f46e5; transform: scale(1.12); box-shadow: 0 0 0 2px #fff inset; }
-        .safety-row { display: flex; justify-content: space-between; align-items: center; padding-top: 8px; border-top: 1px solid #e2e8f0; font-size: 12px; font-weight: 700; color: #334155; }
-        .safety-row input { width: 18px; height: 18px; accent-color: #4f46e5; cursor: pointer; }
+        .phone-container:has(#view-home.active-view) { max-width: 760px; }
+        .home-intro { padding: 22px; border: 1px solid #f0e2f0; border-radius: 19px; background: linear-gradient(135deg, #fff9fc, #f1e3ff); margin-bottom: 16px; }
+        .home-intro h1 { text-align: left; font-size: clamp(32px, 7vw, 50px); letter-spacing: -.05em; }
+        .home-intro h1 span { color: #6235bf; }
+        .home-intro p { color: #60566c; font-size: 15px; line-height: 1.5; }
+        .profile-card { border: 1px solid #e9e1ef; border-radius: 20px; padding: clamp(14px, 3vw, 22px); margin-bottom: 18px; color: #211634; background: #fff; display: grid; gap: 14px; }
+        .profile-card h2 { font-size: 24px; letter-spacing: -.04em; }
+        .profile-card fieldset { min-width: 0; border: 0; }
+        .profile-card legend { margin-bottom: 7px; font-size: 15px; font-weight: 750; }
+        .profile-options { display: flex; flex-wrap: wrap; gap: 7px; }
+        .profile-columns { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        .profile-pill { position: relative; display: inline-flex; }
+        .profile-pill input { position: absolute; width: 1px; height: 1px; opacity: 0; top: 50%; left: 50%; pointer-events: none; }
+        .profile-pill span { display: inline-flex; align-items: center; gap: 7px; padding: 8px 11px; border: 1px solid #e9e1ef; border-radius: 999px; background: #fff; color: #211634; font-size: 14px; line-height: 1.3; cursor: pointer; }
+        .profile-pill input:checked + span { border-color: #6235bf; background: #efe5ff; color: #46247f; }
+        .profile-pill input:focus-visible + span { outline: 3px solid #ae8be9; outline-offset: 2px; }
+        .tone-dot { width: 13px; height: 13px; border-radius: 50%; border: 1px solid #21163422; }
+        .profile-card .profile-safety { padding: 9px 13px 13px; background: #f7f3fb; border-radius: 13px; }
+        .profile-safety label { display: flex; align-items: start; gap: 9px; font-size: 14px; line-height: 1.4; }
+        .profile-safety label + label { margin-top: 8px; }
+        .profile-safety input { width: 17px; height: 17px; accent-color: #6235bf; flex: none; }
+        @media (max-width: 480px) { .profile-columns { grid-template-columns: 1fr; } }
         .scan-card { width: 100%; background: linear-gradient(135deg, #ffffff 0%, #f3e8ff 100%); border: 2px dashed #c084fc; border-radius: 20px; padding: 28px 20px; cursor: pointer; text-align: center; margin-bottom: 14px; }
         .camera-box { width: 60px; height: 60px; background: #ffffff; border-radius: 50%; display: flex; justify-content: center; align-items: center; margin: 0 auto 12px; box-shadow: 0 8px 16px rgba(0,0,0,0.08); font-size: 28px; }
         .card-title { font-size: 17px; font-weight: 800; color: #1e293b; margin-bottom: 4px; }
@@ -137,62 +149,81 @@
 
         
         <div id="view-home" class="page-view active-view">
-            <div class="seasonal-banner"><span>🍂 Fall Barrier Care: Centella & Ceramide Picks</span><span>→</span></div>
-            <span class="badge">⚡ 1-Second AI Skin Analytics</span>
-            <h1>Find Your Perfect<br><span>K-Beauty Solution</span></h1>
-            <p class="description">AI 피부 정밀 스캔으로 나에게 딱 맞는 한국 스킨케어를 1초 만에 처방받으세요.</p>
+            <div class="home-intro">
+                <h1>Meet your<br><span>K-beauty routine.</span></h1>
+                <p>Tell us about your skin and add a selfie to get a personalized skincare routine.</p>
+            </div>
 
-            <div class="option-box">
-                <span class="option-label">1. Who is this scan for? (진단 대상)</span>
-                <div class="pill-group" id="target-group">
-                    <div class="pill-btn active" onclick="selectPill('target', 'For Me', this)">For Me</div>
-                    <div class="pill-btn" onclick="selectPill('target', 'For Family', this)">For Family</div>
-                    <div class="pill-btn" onclick="selectPill('target', 'For Friend', this)">For Friend</div>
-                </div>
-                <span class="option-label">2. Select Skin Tone & Gender (피부톤 및 성별)</span>
-                <div class="tone-group">
-                    <div class="tone-circle active" style="background:#fde6d8;" onclick="selectTone(1, this)"></div>
-                    <div class="tone-circle" style="background:#f3cfb3;" onclick="selectTone(2, this)"></div>
-                    <div class="tone-circle" style="background:#d9a77c;" onclick="selectTone(3, this)"></div>
-                    <div class="tone-circle" style="background:#b57c4c;" onclick="selectTone(4, this)"></div>
-                    <div class="tone-circle" style="background:#7d4e2d;" onclick="selectTone(5, this)"></div>
-                    <div class="tone-circle" style="background:#422514;" onclick="selectTone(6, this)"></div>
-                </div>
-                <div class="pill-group" id="gender-group">
-                    <div class="pill-btn active" onclick="selectPill('gender', 'Female', this)">Female</div>
-                    <div class="pill-btn" onclick="selectPill('gender', 'Male', this)">Male</div>
-                    <div class="pill-btn" onclick="selectPill('gender', 'Neutral', this)">Unspecified</div>
-                </div>
-                <fieldset id="main-concerns" style="border:0; padding:8px 0; margin:0;">
-                    <legend class="option-label">Main skin concerns</legend>
-                    <div style="display:flex;flex-wrap:wrap;gap:8px">
-                        <label><input type="checkbox" value="Dryness"> Dryness</label>
-                        <label><input type="checkbox" value="Oiliness"> Oiliness</label>
-                        <label><input type="checkbox" value="Redness"> Redness</label>
-                        <label><input type="checkbox" value="Pores"> Pores</label>
-                        <label><input type="checkbox" value="Pigmentation"> Pigmentation</label>
-                        <label><input type="checkbox" value="Wrinkles"> Wrinkles</label>
+            <section class="profile-card" aria-labelledby="profile-heading">
+                <h2 id="profile-heading">Your skin profile</h2>
+                <fieldset>
+                    <legend>Who is this scan for?</legend>
+                    <div class="profile-options">
+                        <label class="profile-pill"><input type="radio" name="profile-target" value="For Me" checked><span>For Me</span></label>
+                        <label class="profile-pill"><input type="radio" name="profile-target" value="For Family"><span>For Family</span></label>
+                        <label class="profile-pill"><input type="radio" name="profile-target" value="For Friend"><span>For Friend</span></label>
                     </div>
                 </fieldset>
-                <div class="safety-row">
-                    <span>🛡️ Pregnant / Nursing or Taking Acne Medication</span>
-                    <input type="checkbox" id="safety-toggle">
+                <fieldset>
+                    <legend>Age Group</legend>
+                    <div class="profile-options">
+                        <label class="profile-pill"><input type="radio" name="profile-age" value="10s"><span>10s</span></label>
+                        <label class="profile-pill"><input type="radio" name="profile-age" value="20s"><span>20s</span></label>
+                        <label class="profile-pill"><input type="radio" name="profile-age" value="30s"><span>30s</span></label>
+                        <label class="profile-pill"><input type="radio" name="profile-age" value="40s"><span>40s</span></label>
+                        <label class="profile-pill"><input type="radio" name="profile-age" value="50s"><span>50s</span></label>
+                        <label class="profile-pill"><input type="radio" name="profile-age" value="60s+"><span>60s+</span></label>
+                    </div>
+                </fieldset>
+                <div class="profile-columns">
+                    <fieldset>
+                        <legend>Gender</legend>
+                        <div class="profile-options">
+                        <label class="profile-pill"><input type="radio" name="profile-gender" value="Female"><span>Female</span></label>
+                        <label class="profile-pill"><input type="radio" name="profile-gender" value="Male"><span>Male</span></label>
+                        <label class="profile-pill"><input type="radio" name="profile-gender" value="Non-binary"><span>Non-binary</span></label>
+                        </div>
+                    </fieldset>
+                    <fieldset>
+                        <legend>Skin Tone</legend>
+                        <div class="profile-options">
+                        <label class="profile-pill"><input type="radio" name="profile-tone" value="Light"><span><i class="tone-dot" style="background:#f3d2b8" aria-hidden="true"></i>Light</span></label>
+                        <label class="profile-pill"><input type="radio" name="profile-tone" value="Medium"><span><i class="tone-dot" style="background:#a9825c" aria-hidden="true"></i>Medium</span></label>
+                        <label class="profile-pill"><input type="radio" name="profile-tone" value="Deep"><span><i class="tone-dot" style="background:#583e32" aria-hidden="true"></i>Deep</span></label>
+                        </div>
+                    </fieldset>
                 </div>
-            </div>
+                <fieldset id="main-concerns">
+                    <legend>Main skin concerns</legend>
+                    <div class="profile-options">
+                        <label class="profile-pill"><input type="checkbox" name="profile-concern" value="Dryness"><span>Dryness</span></label>
+                        <label class="profile-pill"><input type="checkbox" name="profile-concern" value="Oiliness"><span>Oiliness</span></label>
+                        <label class="profile-pill"><input type="checkbox" name="profile-concern" value="Redness"><span>Redness</span></label>
+                        <label class="profile-pill"><input type="checkbox" name="profile-concern" value="Pores"><span>Pores</span></label>
+                        <label class="profile-pill"><input type="checkbox" name="profile-concern" value="Pigmentation"><span>Pigmentation</span></label>
+                        <label class="profile-pill"><input type="checkbox" name="profile-concern" value="Wrinkles"><span>Wrinkles</span></label>
+                    </div>
+                </fieldset>
+                <fieldset class="profile-safety">
+                    <legend>Safety filters</legend>
+                    <label><input type="checkbox" id="profile-pregnancy"> Pregnant / Nursing</label>
+                    <label><input type="checkbox" id="profile-medication"> Acne Medication (Isotretinoin/Antibiotics)</label>
+                </fieldset>
+            </section>
 
             <div class="scan-card" style="cursor:default;">
                 <div class="camera-box">📸</div>
-                <div class="card-title">1-Second AI Skin Scan</div>
-                <div class="card-sub">카메라로 직접 촬영하거나 갤러리에서 사진을 선택하세요</div>
+                <div class="card-title">Add a photo</div>
+                <div class="card-sub">Face the camera in even light, or upload a clear front-facing photo.</div>
                 <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:12px;">
-                    <button type="button" class="btn-scan" style="background:#334155; padding:11px 8px;" onclick="triggerDirectCamera()">📷 카메라 촬영</button>
-                    <button type="button" class="btn-scan" style="padding:11px 8px;" onclick="triggerGallery()">🖼️ 갤러리 선택</button>
+                    <button type="button" class="btn-scan" style="background:#334155; padding:11px 8px;" onclick="triggerDirectCamera()">📷 Take Selfie</button>
+                    <button type="button" class="btn-scan" style="padding:11px 8px;" onclick="triggerGallery()">🖼️ Upload Photo</button>
                 </div>
-                <div class="scan-limit-text" id="limit-indicator">오늘 무료 스캔 잔여 횟수: 3 / 3회</div>
+                <div class="scan-limit-text" id="limit-indicator">3 of 3 free scans left today</div>
             </div>
 
 
-            <button type="button" class="btn-quiz" onclick="openQuizModal()">📝 카메라가 어렵다면? 30초 간단 설문으로 진단받기</button>
+            <button type="button" class="btn-quiz" onclick="openQuizModal()">Use the skincare questionnaire instead</button>
 
             <div class="partners">
                 <p class="partner-title">Official K-Beauty Brands • Direct Global Shipping</p>
@@ -373,8 +404,6 @@
     <script>
         let currentStep = 'home';
         let selectedTarget = 'For Me';
-        let selectedTone = 1;
-        let selectedGender = 'Female';
         let userEmail = '';
         let totalPrice = 22.00;
 
@@ -406,18 +435,6 @@
             switchView('home');
         }
 
-        function selectPill(group, val, el) {
-            el.parentElement.querySelectorAll('.pill-btn').forEach(b => b.classList.remove('active'));
-            el.classList.add('active');
-            if(group === 'target') selectedTarget = val;
-            if(group === 'gender') selectedGender = val;
-        }
-
-        function selectTone(toneNum, el) {
-            document.querySelectorAll('.tone-circle').forEach(c => c.classList.remove('active'));
-            el.classList.add('active');
-            selectedTone = toneNum;
-        }
         function checkScanLimit() {
             try {
                 const today = new Date().toDateString();
@@ -439,7 +456,7 @@
                 const today = new Date().toDateString();
                 let usage = JSON.parse(localStorage.getItem('skintic_usage') || '{"date":"","count":0}');
                 let left = (usage.date === today) ? Math.max(0, 3 - usage.count) : 3;
-                document.getElementById('limit-indicator').innerText = `오늘 무료 스캔 잔여 횟수: ${left} / 3회`;
+                document.getElementById('limit-indicator').innerText = `${left} of 3 free scans left today`;
             } catch(e) {}
         }
 
@@ -582,7 +599,17 @@
         function readAdvisorProfile(quizConcern) {
             const selected = [...document.querySelectorAll('#main-concerns input:checked')].map(input => input.value);
             const concerns = quizConcern ? [...new Set([quizConcern, ...selected])] : selected;
-            return { concerns, cautious: document.getElementById('safety-toggle').checked };
+            const checkedValue = name => document.querySelector('input[name="' + name + '"]:checked')?.value;
+            const pregnancy = document.getElementById('profile-pregnancy').checked;
+            const medication = document.getElementById('profile-medication').checked;
+            return {
+                target: checkedValue('profile-target') || 'For Me',
+                ageGroup: checkedValue('profile-age'),
+                gender: checkedValue('profile-gender'),
+                skinTone: checkedValue('profile-tone'),
+                concerns, pregnancy, medication,
+                cautious: pregnancy || medication
+            };
         }
 
         function buildAdvisor(profile, photo) {
@@ -619,6 +646,11 @@
             if (focus) copy.push('Your routine prioritizes ' + focus.toLowerCase() + '.');
             copy.push('Start with ' + name + '. We chose it for ' + purpose + '.');
             if (focus && sku !== advisorConcerns[focus]) copy.push('We selected a simpler routine based on your sensitivity or safety preferences.');
+            if (profile.ageGroup === '10s') copy.push('Keep your routine simple and introduce one product at a time.');
+            if (profile.skinTone === 'Medium' || profile.skinTone === 'Deep') {
+                copy.push('When choosing sunscreen, look for a finish that blends evenly with your skin tone.');
+            }
+            if (profile.medication) copy.push('Some acne medications increase sun sensitivity. Use broad-spectrum sunscreen and ask your prescriber before adding exfoliants.');
             return { sku, name, advice: copy.join(' ') };
         }
 
@@ -705,8 +737,11 @@
         }
         
                 function renderReport() {
+            const profile = aiResultMetrics.profile || readAdvisorProfile();
+            selectedTarget = profile.target;
             const targetBadge = document.getElementById('report-target-badge');
-            if (targetBadge) targetBadge.innerText = `${selectedTarget} • K-Beauty Skin Match`;
+            if (targetBadge) targetBadge.innerText =
+                [profile.target, profile.ageGroup, profile.gender, profile.skinTone && profile.skinTone + ' skin tone'].filter(Boolean).join(' • ');
 
             const scoreBadge = document.querySelector('.score-badge');
             if (scoreBadge) {
@@ -720,7 +755,7 @@
                 : 'Not measured';
 
             const { sku, name: prodName, advice } = buildAdvisor(
-                aiResultMetrics.profile || readAdvisorProfile(), aiResultMetrics.photo);
+                profile, aiResultMetrics.photo);
             const upsell = document.getElementById('upsell-check');
             upsell.checked = false;
             upsell.closest('label').hidden = sku === 'toner';
