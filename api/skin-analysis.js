@@ -29,7 +29,7 @@ module.exports = async function handler(req, res) {
     res.setHeader("Allow", "GET, POST");
     return fail(405, "Use GET or POST for this endpoint.");
   }
-  if (!key) return fail(503, "The Vercel environment variable AILABTOOLS_API_KEY is missing.");
+  if (!key) return fail(503, "The Vercel environment variable AILABTOOLS__KEY is missing.");
 
   let body = req.body;
   if (typeof body === "string") {
@@ -60,7 +60,7 @@ module.exports = async function handler(req, res) {
     const upstream = await fetch(AILAB_URL, {
       method: "POST",
       headers: {
-        "ailabapi-api-key": key,
+        "ailabapi-api-key": key,'h1yyYVoI4LTKyHrdyyghhlZOoBFwlTs3GRPTQuiRwvXEZx25GvOosWjjbc7JzPXH'
         "Content-Type": "multipart/form-data; boundary=" + boundary
       },
       body: multipart,
