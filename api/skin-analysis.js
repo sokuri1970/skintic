@@ -58,14 +58,16 @@ module.exports = async function handler(req, res) {
   ]);
   try {
     const upstream = await fetch(AILAB_URL, {
-      method: "POST",
-      headers: {
-        "ailabapi-api-key": key,'h1yyYVoI4LTKyHrdyyghhlZOoBFwlTs3GRPTQuiRwvXEZx25GvOosWjjbc7JzPXH'
-        "Content-Type": "multipart/form-data; boundary=" + boundary
+    method: "POST",
+    headers: {
+        "ailabapi-api-key": "h1yyYVoI4LTKyHrdyyghhlZOoBFwlTs3GRPTQuiRwvXEZx25GvOosWjjbc7JzPXH",
+        "Content-Type": "multipart/form-data; boundary=" + boundary,
+        "Content-Length": String(multipart.length)
       },
       body: multipart,
       signal: AbortSignal.timeout(24000)
     });
+
     const payload = await upstream.json().catch(error => {
       if (error instanceof SyntaxError) return null;
       throw error;
