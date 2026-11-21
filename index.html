@@ -267,7 +267,7 @@
                 <button type="button" class="btn-tool highlight" onclick="generateBeforeAfter()">📸 Before / After Photos</button>
             </div>
 
-            <div class="section-title">Primary Prescription (핵심 단품 처방)</div>
+            <div class="section-title">Primary Prescription</div>
             <div class="product-card">
                 <div class="product-img">🍀</div>
                 <div class="product-info">
@@ -286,23 +286,23 @@
                 </div>
             </label>
 
-            <button type="button" class="btn-primary" id="btn-buy-now" onclick="goToCheckout()">Buy Now - $22.00 (결제하기)</button>
-            <button type="button" class="btn-retake" onclick="goHome()">🔄 Retake Photo / Scan Another Person (다시 촬영하기)</button>
+            <button type="button" class="btn-primary" id="btn-buy-now" onclick="goToCheckout()">Buy Now - $22.00 </button>
+            <button type="button" class="btn-retake" onclick="goHome()">🔄 Retake Photo / Scan Another Person</button>
         </div>
 
         <div id="view-checkout" class="page-view">
             <h2 style="font-size:20px; font-weight:800; margin-bottom:16px;">Global Shipping & Checkout</h2>
-            <div class="form-group"><label>Full Name (영문 성명) *</label><input type="text" id="ship-name" placeholder="e.g. Jane Doe"></div>
-            <div class="form-group"><label>Email (영수증 및 송장 수신용) *</label><input type="email" id="ship-email" placeholder="jane@example.com"></div>
-            <div class="form-group"><label>Phone Number (해외 특송사 연락용) *</label><input type="tel" id="ship-phone" placeholder="e.g. +1 212-555-0199"></div>
+            <div class="form-group"><label>Full Name *</label><input type="text" id="ship-name" placeholder="e.g. Jane Doe"></div>
+            <div class="form-group"><label>Email  (For Receipt & Tracking)  *</label><input type="email" id="ship-email" placeholder="jane@example.com"></div>
+            <div class="form-group"><label>Phone Number (For Carrier Delivery) *</label><input type="tel" id="ship-phone" placeholder="e.g. +1 212-555-0199"></div>
             <div class="form-group">
-                <label>Country (배송 국가) *</label>
+                <label>Country*</label>
                 <select id="ship-country">
-                    <option value="US">United States (미국)</option><option value="UK">United Kingdom (영국)</option>
-                    <option value="EU">European Union (유럽)</option><option value="SEA">Southeast Asia (동남아시아)</option>
+                    <option value="US">United States</option><option value="UK">United Kingdom </option>
+                    <option value="EU">European Union </option><option value="SEA">Southeast Asia </option>
                 </select>
             </div>
-            <div class="form-group"><label>Street Address, City, Zip Code (영문 상세 주소) *</label><input type="text" id="ship-address" placeholder="123 Main St, Apt 4B, New York, NY 10001"></div>
+            <div class="form-group"><label>Street Address, City, Zip Code *</label><input type="text" id="ship-address" placeholder="123 Main St, Apt 4B, New York, NY 10001"></div>
 
             <div class="order-summary">
                 <div class="summary-row"><span id="summary-item-name">SKIN1004 Centella Ampoule</span><span id="summary-item-price">$22.00</span></div>
@@ -319,16 +319,16 @@
             <div class="confirm-box">
                 <div class="confirm-icon">✅</div>
                 <h2 style="font-size:22px; font-weight:800;">Order Confirmed!</h2>
-                <p style="font-size:13px; color:#64748b; margin-top:6px;">주문이 실리콘투 글로벌 물류센터로 자동 전송되었습니다.</p>
+                <p style="font-size:13px; color:#64748b; margin-top:6px;">Your order has been automatically transmitted to Silicon2 Global Fulfillment Center.</p>
                 <div class="order-num" id="display-order-num">#SKT-2026-8841</div>
 
                 <div class="revisit-guide">
-                    <strong>📌 스마트폰에서 Skintic 쉽게 다시 찾는 법:</strong><br>
-                    1. 방금 입력하신 이메일로 <strong>[원클릭 재주문 및 배송조회 링크]</strong>가 발송되었습니다.<br>
-                    2. 지금 브라우저 메뉴에서 <strong>'홈 화면에 추가'</strong>를 눌러두시면 다음번 가족/본인 재주문이 1초 만에 가능합니다!
-                </div>
+                    <strong>📌  How to easily revisit Skintic on your phone:</strong><br>
+                     1. A <strong>[1-Click Reorder & Tracking Link]</strong> has been sent to your email.<br>
+                     2. Tap <strong>'Add to Home Screen'</strong> in your browser menu for instant 1-second reorders for you and your family!
+                 </div>
 
-                <button type="button" class="btn-primary" onclick="goHome()">메인 화면으로 돌아가기</button>
+                <button type="button" class="btn-primary" onclick="goHome()">Back to Home</button>
             </div>
         </div>
         <footer>
@@ -358,8 +358,8 @@
     <div id="modal-loading" class="overlay-modal">
         <div class="modal-card">
             <div class="spinner"></div>
-            <h3 style="font-size:16px; font-weight:800; color:#0f172a;">📸 Skintic AI 정밀 분석 중...</h3>
-            <p style="font-size:12px; color:#64748b; margin-top:6px;">피부 장벽 및 성분 매칭 데이터를 계산하고 있습니다.</p>
+            <h3 style="font-size:16px; font-weight:800; color:#0f172a;">📸 Analyzing Skin Profile...</h3>
+            <p style="font-size:12px; color:#64748b; margin-top:6px;">Matching skin barrier metrics & K-beauty ingredients.</p>
         </div>
     </div>
 
@@ -370,17 +370,18 @@
             <p style="font-size:12.5px; color:#64748b; margin-bottom:16px;">Save this report permanently & send a copy to your email.</p>
             <input type="email" id="gate-email-input" placeholder="Enter your email (e.g. name@gmail.com)" style="width:100%; padding:12px; border:1px solid #cbd5e1; border-radius:10px; margin-bottom:10px; font-size:14px;">
             <button type="button" class="btn-primary" onclick="unlockReport(true)">Save & Send Report to Email →</button>
-            <button type="button" class="btn-retake" onclick="unlockReport(false)">No Email? Skip & View on Phone</button>
+            <button type="button" class="btn-retake" onclick="unlockReport(false)">No Email? Skip →</button>
         </div>
     </div>
 
     <div id="modal-quiz" class="overlay-modal">
         <div class="modal-card" style="text-align:left;">
-            <h3 style="font-size:17px; font-weight:800; margin-bottom:12px;">📝 30초 간단 피부 퀴즈</h3>
+            <h3 style="font-size:17px; font-weight:800; margin-bottom:12px;">📝 30-Second Skin Quiz</h3>
             <div class="form-group">
-                <label>Q1. 세안 후 피부 당김이나 유분기는 어떤가요?</label>
-                <select id="quiz-type"><option value="Oily">번들거리고 피지가 많은 편 (지성)</option><option value="Dry">당기고 건조한 편 (건성)</option><option value="Sensitive">쉽게 붉어지고 예민함 (민감성)</option></select>
+                <label>Q1. How does your skin feel after cleansing?</label>
+                <select id="quiz-type"><option value="Oily">Oily & shiny (Oily Skin)</option><option value="Dry">Tight & flaky (Dry Skin)</option><option value="Sensitive">Easily flushed & irritated (Sensitive Skin)</option></select>
             </div>
+            
             <div class="form-group">
                 <label>Q2. 가장 해결하고 싶은 피부 고민 1순위는?</label>
                 <select id="quiz-concern"><option value="Redness">홍조 및 트러블 진정</option><option value="Hydration">속건조 및 수분 장벽 강화</option><option value="Pores">넓어진 모공 및 피지 케어</option></select>
