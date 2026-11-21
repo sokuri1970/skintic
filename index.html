@@ -730,23 +730,37 @@
             }
         }
 
-                function sendReportEmail(targetEmail, prodName, adviceText) {
-                if (!targetEmail || typeof emailjs === 'undefined') return;
-                const currentScore = aiResultMetrics.score ?? 74;
-                const templateParams = {
-                    to_email: targetEmail,
-                    target_person: selectedTarget,
-                    skin_score: currentScore,
-                    product_name: prodName,
-                    ai_advice: adviceText.replace(/"/g, '')
+       function sendReportEmail(targetEmail, prodName, adviceText) {
+            if (!targetEmail || typeof emailjs === 'undefined') return;
+            const profile = aiResultMetrics.profile || readAdvisorProfile();
+            const currentScore = aiResultMetrics.score ?? 90;
+            const profileSummary = [profile.target, profile.ageGroup, profile.gender, profile.skinTone].filter(Boolean).join(' • ') || 'For Me';
+
+            const fullRoutineText = [
+                `1. Cleanser — Beauty of Joseon Green Plum Refreshing Cleanser`,
+                `2. Toner — Anua Heartleaf 77% Soothing Toner`,
+                `3. Ampoule / Serum — ${prodName}`,
+                `4. Cream — Anua 3 Ceramide Panthenol Moisture Barrier Cream`,
+                `5. Sunscreen — Beauty of Joseon Relief Sun: Rice + Probiotics`
+            ].join('\n');
+
+            const templateParams = {
+                to_email: targetEmail,
+                target_person: profileSummary,
+                skin_score: currentScore,
+                product_name: prodName,
+                ai_advice: adviceText.replace(/"/g, ''),
+                k_routine: fullRoutineText
             };
+
             emailjs.send('service_3spn9dv', 'template_gr04v5s', templateParams)
                 .then(function(response) {
-                    console.log('Skintic Report Email Sent!', response.status);
+                    console.log('Skintic Full Report Email Sent!', response.status);
                 }, function(error) {
                     console.log('Email Send Error:', error);
                 });
         }
+
 
 
         function unlockReport(withEmail) {
