@@ -837,36 +837,134 @@
             document.getElementById('btn-buy-now').innerText = `Buy Now - $${totalPrice.toFixed(2)} (결제하기)`;
         }
 
-        function savePrescriptionImage() {
+                function savePrescriptionImage() {
             const canvas = document.getElementById('export-canvas');
+            canvas.width = 720;
+            canvas.height = 1140;
             const ctx = canvas.getContext('2d');
-            const currentScore = aiResultMetrics.score ?? 74;
+
+            const profile = aiResultMetrics.profile || readAdvisorProfile();
+            const currentScore = aiResultMetrics.score ?? 90;
             const prodName = document.getElementById('main-product-name').innerText;
+            const dateStr = new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+            const profileSummary = [profile.target, profile.ageGroup, profile.skinTone].filter(Boolean).join(' • ') || 'For Me';
 
-            ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, 600, 400);
-            ctx.fillStyle = '#4f46e5'; ctx.fillRect(0, 0, 600, 70);
-            ctx.fillStyle = '#ffffff'; ctx.font = 'bold 26px sans-serif'; ctx.fillText('Skintic AI Skin Prescription', 24, 45);
-            
-            ctx.fillStyle = '#0f172a'; ctx.font = 'bold 20px sans-serif';
-            ctx.fillText(`Profile: ${selectedTarget} | Skin Score: ${currentScore}/100`, 24, 115);
-            ctx.font = 'bold 17px sans-serif'; ctx.fillStyle = '#4f46e5';
-            ctx.fillText(`Hero Product: ${prodName}`, 24, 155);
+            // 긴 문장 자동 줄바꿈 도우미 함수
+            function drawWrappedText(text, x, startY, maxWidth, lineHeight) {
+                const words = text.split(' ');
+                let line = '';
+                let y = startY;
+                for (let n = 0; n < words.length; n++) {
+                    const testLine = line + words[n] + ' ';
+                    if (ctx.measureText(testLine).width > maxWidth && n > 0) {
+                        ctx.fillText(line.trim(), x, y);
+                        line = words[n] + ' ';
+                        y += lineHeight;
+                    } else {
+                        line = testLine;
+                    }
+                }
+                ctx.fillText(line.trim(), x, y);
+                return y + lineHeight;
+            }
 
-            ctx.fillStyle = '#334155'; ctx.font = '14px sans-serif';
-            const rawAdvice = document.getElementById('ai-advice-text').innerText.replace('⚡ Live AILabTools Engine Connected', '').replace('🤖 Skintic AI Advisor:', '').trim();
-            ctx.fillText(rawAdvice.slice(0, 68) + '...', 24, 195);
+            // 1. 전체 배경 & 상단 보라색 헤더
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(0, 0, 720, 1140);
+            ctx.fillStyle = '#5b21b6';
+            ctx.fillRect(0, 0, 720, 150);
 
-            ctx.fillStyle = '#64748b'; ctx.font = '14px sans-serif';
-            ctx.fillText(`Date: ${new Date().toLocaleDateString('en-US')}`, 24, 240);
-            ctx.fillStyle = '#ec4899'; ctx.font = 'bold 18px sans-serif';
-            ctx.fillText('Reorder anytime at: https://skinmatch.kr', 24, 355);
+            ctx.fillStyle = '#ffffff';
+            ctx.font = 'bold 38px sans-serif';
+            ctx.fillText('Skintic AI Skin Report', 40, 75);
+            ctx.font = '20px sans-serif';
+            ctx.fillStyle = '#ede9fe';
+            ctx.fillText(`${dateStr}  |  Skin Score: ${currentScore} / 100`, 40, 115);
 
+            let curY = 205;
+
+            // 2. Skin profile 섹션
+            ctx.fillStyle = '#6d28d9';
+            ctx.font = 'bold 23px sans-serif';
+            ctx.fillText('Skin profile', 40, curY);
+            curY += 34;
+            ctx.fillStyle = '#1e293b';
+            ctx.font = '21px sans-serif';
+            ctx.fillText(profileSummary, 40, curY);
+            curY += 54;
+
+            // 3. Skin analysis 섹션
+            ctx.fillStyle = '#6d28d9';
+            ctx.font = 'bold 23px sans-serif';
+            ctx.fillText('Skin analysis', 40, curY);
+            curY += 34;
+            ctx.fillStyle = '#1e293b';
+            ctx.font = '20px sans-serif';
+            ctx.fillText(`Overall Skin Score — ${currentScore}/100`, 40, curY); curY += 30;
+            ctx.fillText(`Redness intensity — ${aiResultMetrics.red ?? 48}/100`, 40, curY); curY += 30;
+            ctx.fillText(`Moisture balance — ${aiResultMetrics.blue ?? 52}/100`, 40, curY); curY += 30;
+            ctx.fillText(`Visible pores index — ${aiResultMetrics.green ?? 44}/100`, 40, curY);
+            curY += 54;
+
+            // 4. Skincare advice 섹션 (이메일과 동일한 동적 AI 소견)
+            ctx.fillStyle = '#6d28d9';
+            ctx.font = 'bold 23px sans-serif';
+            ctx.fillText('Skincare advice', 40, curY);
+            curY += 34;
+            ctx.fillStyle = '#1e293b';
+            ctx.font = '19px sans-serif';
+            const rawAdvice = document.getElementById('ai-advice-text').innerText
+                .replace('⚡ Live AILabTools Engine Connected', '')
+                .replace('⚠️ Questionnaire / Fallback Mode', '')
+                .replace('🤖 Skintic AI Advisor:', '')
+                .trim();
+            curY = drawWrappedText(rawAdvice, 40, curY, 640, 28) + 28;
+
+            // 5. K-beauty routine 5단계 섹션
+            ctx.fillStyle = '#6d28d9';
+            ctx.font = 'bold 23px sans-serif';
+            ctx.fillText('K-beauty routine', 40, curY);
+            curY += 34;
+            ctx.fillStyle = '#1e293b';
+            ctx.font = '19px sans-serif';
+            const routineSteps = [
+                'Cleanser — Beauty of Joseon Green Plum Refreshing Cleanser',
+                'Toner — Anua Heartleaf 77% Soothing Toner',
+                `Ampoule / Serum — ${prodName}`,
+                'Cream — Anua 3 Ceramide Panthenol Moisture Barrier Cream',
+                'Sunscreen — Beauty of Joseon Relief Sun: Rice + Probiotics'
+            ];
+            routineSteps.forEach(step => {
+                curY = drawWrappedText(step, 40, curY, 640, 27) + 4;
+            });
+            curY += 26;
+
+            // 6. Hero Product & Disclaimer 섹션
+            ctx.fillStyle = '#6d28d9';
+            ctx.font = 'bold 23px sans-serif';
+            ctx.fillText('Hero Product', 40, curY);
+            curY += 32;
+            ctx.fillStyle = '#0f172a';
+            ctx.font = 'bold 20px sans-serif';
+            ctx.fillText(prodName, 40, curY);
+            curY += 46;
+
+            ctx.fillStyle = '#6d28d9';
+            ctx.font = 'bold 20px sans-serif';
+            ctx.fillText('Disclaimer', 40, curY);
+            curY += 28;
+            ctx.fillStyle = '#64748b';
+            ctx.font = '17px sans-serif';
+            drawWrappedText('Skintic is not a medical institution or medical device, and does not provide medical advice. Reorder anytime at https://skinmatch.kr', 40, curY, 640, 24);
+
+            // 이미지 다운로드 실행
             const link = document.createElement('a');
-            link.download = `Skintic_Prescription_${Date.now()}.png`;
-            link.href = canvas.toDataURL();
+            link.download = `Skintic_AI_Skin_Report_${Date.now()}.png`;
+            link.href = canvas.toDataURL('image/png');
             link.click();
-            alert("📥 Your AI Skin Prescription image has been saved to your gallery!");
+            alert("📥 Your full Skintic AI Skin Report has been saved to your gallery!");
         }
+
 
 
         function generateBeforeAfter() {
