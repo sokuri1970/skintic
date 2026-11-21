@@ -702,21 +702,20 @@
                     }
                 };
 
-                // 실제 분석 수치 기반 점수 및 그래프 퍼센트 계산
-                const redVal = r.acne?.value ? Math.min(92, 48 + r.acne.value * 14) : 42;
-                const blueVal = r.skin_type?.skin_type === 0 ? 76 : 46;
-                const greenVal = Math.min(90, 35 + photo.pores.detected * 14);
-                const calcScore = Math.max(58, Math.min(94, Math.round(100 - (redVal + blueVal + greenVal) / 4.8)));
+                 // AILabTools 실제 관찰 결과 기반 동적 점수 산출
+                const penalty = (photo.pores.detected * 4) + (photo.spots ? 6 : 0) + (photo.fineLines.detected * 4) + (profile.concerns.length * 2);
+                const calcScore = Math.max(62, Math.min(94, 92 - penalty));
 
                 aiResultMetrics = {
                     score: calcScore,
-                    red: redVal,
-                    blue: blueVal,
-                    green: greenVal,
+                    red: Math.min(88, 35 + (profile.concerns.includes('Redness') ? 28 : 10) + (photo.spots ? 12 : 0)),
+                    blue: Math.min(88, 38 + (profile.concerns.includes('Dryness') || r.skin_type?.skin_type === 0 ? 30 : 12)),
+                    green: Math.min(88, 30 + (photo.pores.detected * 14)),
                     profile,
                     photo,
                     isRealAi: true
                 };
+
 
                 if (userEmail) renderReport();
                 else document.getElementById('modal-email').style.display = 'flex';
@@ -841,13 +840,26 @@
         function savePrescriptionImage() {
             const canvas = document.getElementById('export-canvas');
             const ctx = canvas.getContext('2d');
+            const currentScore = aiResultMetrics.score ?? 74;
+            const prodName = document.getElementById('main-product-name').innerText;
+
             ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, 600, 400);
             ctx.fillStyle = '#4f46e5'; ctx.fillRect(0, 0, 600, 70);
-            ctx.fillStyle = '#ffffff'; ctx.font = 'bold 28px sans-serif'; ctx.fillText('Skintic AI Skin Prescription', 24, 45);
-            ctx.fillStyle = '#0f172a'; ctx.font = 'bold 22px sans-serif'; ctx.fillText(`Target: ${selectedTarget} | Skin Score: ${aiResultMetrics.score == null ? '—' : aiResultMetrics.score + '/100'}`, 24, 120);
-            ctx.font = '18px sans-serif'; ctx.fillText(`Recommended: ${document.getElementById('main-product-name').innerText}`, 24, 170);
-            ctx.fillStyle = '#64748b'; ctx.font = '16px sans-serif'; ctx.fillText(`Date: ${new Date().toLocaleDateString('en-US')}`, 24, 220);
-            ctx.fillStyle = '#ec4899'; ctx.font = 'bold 20px sans-serif'; ctx.fillText('Reorder anytime at: https://skinmatch.kr', 24, 350);
+            ctx.fillStyle = '#ffffff'; ctx.font = 'bold 26px sans-serif'; ctx.fillText('Skintic AI Skin Prescription', 24, 45);
+            
+            ctx.fillStyle = '#0f172a'; ctx.font = 'bold 20px sans-serif';
+            ctx.fillText(`Profile: ${selectedTarget} | Skin Score: ${currentScore}/100`, 24, 115);
+            ctx.font = 'bold 17px sans-serif'; ctx.fillStyle = '#4f46e5';
+            ctx.fillText(`Hero Product: ${prodName}`, 24, 155);
+
+            ctx.fillStyle = '#334155'; ctx.font = '14px sans-serif';
+            const rawAdvice = document.getElementById('ai-advice-text').innerText.replace('⚡ Live AILabTools Engine Connected', '').replace('🤖 Skintic AI Advisor:', '').trim();
+            ctx.fillText(rawAdvice.slice(0, 68) + '...', 24, 195);
+
+            ctx.fillStyle = '#64748b'; ctx.font = '14px sans-serif';
+            ctx.fillText(`Date: ${new Date().toLocaleDateString('en-US')}`, 24, 240);
+            ctx.fillStyle = '#ec4899'; ctx.font = 'bold 18px sans-serif';
+            ctx.fillText('Reorder anytime at: https://skinmatch.kr', 24, 355);
 
             const link = document.createElement('a');
             link.download = `Skintic_Prescription_${Date.now()}.png`;
@@ -855,6 +867,7 @@
             link.click();
             alert("📥 Your AI Skin Prescription image has been saved to your gallery!");
         }
+
 
         function generateBeforeAfter() {
             let day1Date = new Date().toLocaleDateString('en-US');
