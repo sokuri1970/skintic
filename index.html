@@ -731,13 +731,15 @@
             }
         }
 
-        function sendReportEmail(targetEmail, prodName, adviceText) {
-            if (!targetEmail || typeof emailjs === 'undefined') return;
-            const templateParams = {
-                to_email: targetEmail,
-                target_person: selectedTarget,
-                product_name: prodName,
-                ai_advice: adviceText.replace(/"/g, '')
+                function sendReportEmail(targetEmail, prodName, adviceText) {
+                if (!targetEmail || typeof emailjs === 'undefined') return;
+                const currentScore = aiResultMetrics.score ?? 74;
+                const templateParams = {
+                    to_email: targetEmail,
+                    target_person: selectedTarget,
+                    skin_score: currentScore,
+                    product_name: prodName,
+                    ai_advice: adviceText.replace(/"/g, '')
             };
             emailjs.send('service_3spn9dv', 'template_gr04v5s', templateParams)
                 .then(function(response) {
@@ -746,6 +748,7 @@
                     console.log('Email Send Error:', error);
                 });
         }
+
 
         function unlockReport(withEmail) {
             if (withEmail) {
