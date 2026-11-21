@@ -499,8 +499,8 @@
                 return;
             }
             const canvas = document.createElement('canvas');
-            canvas.width = 360;
-            canvas.height = 480;
+            canvas.width = 480;
+            canvas.height = 640;
             const ctx = canvas.getContext('2d');
             ctx.translate(canvas.width, 0);
             ctx.scale(-1, 1);
@@ -681,10 +681,12 @@
                 const json = await res.json().catch(() => ({}));
                 const r = json.result || json.data || json.observations;
 
-                if (!res.ok || !r || typeof r !== 'object') {
-                    const message = json.error ?? json.error_msg ?? 'No face detected. Please try a clearer front-facing photo.';
-                    throw new Error(typeof message === 'string' ? message : 'Unexpected API response (HTTP ' + res.status + ').');
+                    if (!res.ok || !r || typeof r !== 'object') {
+                    const detailMsg = json.error_detail?.status_message || json.error_msg || json.error;
+                    const message = detailMsg ? `${detailMsg} (Code: ${json.error_code ?? res.status})` : 'No face detected. Please try a clearer front-facing photo.';
+                    throw new Error(message);
                 }
+
 
                 // AILabTools 원본 응답을 buildAdvisor가 이해하는 표준 photo 신호로 변환
                 const skinMap = { 0: 'Dry', 1: 'Neutral', 2: 'Oily', 3: 'Combination' };
